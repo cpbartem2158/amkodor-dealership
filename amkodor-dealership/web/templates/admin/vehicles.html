@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техника - Амкодор</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+<div class="admin-container">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>АМКОДОР</h2>
+            <p>Автосалон</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/admin/dashboard" class="nav-item">
+                <span class="icon">📊</span>
+                Дашборд
+            </a>
+            <a href="/admin/vehicles" class="nav-item active">
+                <span class="icon">🚜</span>
+                Техника
+            </a>
+            <a href="/admin/sales" class="nav-item">
+                <span class="icon">💰</span>
+                Продажи
+            </a>
+            <a href="/admin/customers" class="nav-item">
+                <span class="icon">👥</span>
+                Клиенты
+            </a>
+            <a href="/admin/employees" class="nav-item">
+                <span class="icon">👔</span>
+                Сотрудники
+            </a>
+            <a href="/admin/service" class="nav-item">
+                <span class="icon">🔧</span>
+                Сервис
+            </a>
+            <a href="/admin/reports" class="nav-item">
+                <span class="icon">📈</span>
+                Отчеты
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()" class="btn-logout">Выход</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="main-header">
+            <h1>Управление техникой</h1>
+            <button onclick="openCreateModal()" class="btn btn-primary">+ Добавить технику</button>
+        </header>
+
+        <!-- Фильтры -->
+        <section class="filters-section">
+            <div class="filters">
+                <input type="text" id="searchModel" placeholder="Модель" class="form-control">
+                <input type="text" id="searchCategory" placeholder="Категория" class="form-control">
+                <select id="filterStatus" class="form-control">
+                    <option value="">Все статусы</option>
+                    <option value="В наличии">В наличии</option>
+                    <option value="Продано">Продано</option>
+                    <option value="Зарезервировано">Зарезервировано</option>
+                </select>
+                <button onclick="searchVehicles()" class="btn btn-secondary">Поиск</button>
+                <button onclick="resetFilters()" class="btn">Сбросить</button>
+            </div>
+        </section>
+
+        <!-- Таблица -->
+        <section class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Модель</th>
+                    <th>Категория</th>
+                    <th>Год</th>
+                    <th>Цена</th>
+                    <th>Скидка</th>
+                    <th>Статус</th>
+                    <th>Склад</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody id="vehiclesTable">
+                <tr>
+                    <td colspan="9" style="text-align: center;">Загрузка...</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Пагинация -->
+        <div class="pagination" id="pagination"></div>
+    </main>
+</div>
+
+<!-- Модальное окно создания/редактирования -->
+<div id="vehicleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Добавить технику</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="vehicleForm" onsubmit="saveVehicle(event)">
+            <div class="form-group">
+                <label class="form-label">Модель</label>
+                <input type="number" id="modelId" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Склад</label>
+                <input type="number" id="warehouseId" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">VIN</label>
+                <input type="text" id="vin" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Серийный номер</label>
+                <input type="text" id="serialNumber" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Год выпуска</label>
+                <input type="number" id="manufactureYear" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цвет</label>
+                <input type="text" id="color" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цена</label>
+                <input type="number" step="0.01" id="price" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Скидка (%)</label>
+                <input type="number" step="0.01" id="discount" class="form-control" value="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Статус</label>
+                <select id="status" class="form-control">
+                    <option value="В наличии">В наличии</option>
+                    <option value="Зарезервировано">Зарезервировано</option>
+                    <option value="Продано">Продано</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script>
+    let currentVehicleId = null;
+    let currentPage = 0;
+    const perPage = 20;
+
+    async function loadVehicles() {
+        try {
+            const vehicles = await API.vehicles.getAll({ limit: perPage, offset: currentPage * perPage });
+            displayVehicles(vehicles);
+        } catch (error) {
+            console.error('Error loading vehicles:', error);
+            alert('Ошибка загрузки данных');
+        }
+    }
+
+    function displayVehicles(vehicles) {
+        const tbody = document.getElementById('vehiclesTable');
+
+        if (!vehicles || vehicles.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Нет данных</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = vehicles.map(v => `
+                <tr>
+                    <td>${v.vehicle_id}</td>
+                    <td>${v.model_name || '-'}</td>
+                    <td>${v.category_name || '-'}</td>
+                    <td>${v.manufacture_year}</td>
+                    <td>${formatCurrency(v.price)}</td>
+                    <td>${v.discount}%</td>
+                    <td><span class="badge badge-${getStatusColor(v.status)}">${v.status}</span></td>
+                    <td>${v.warehouse_city || '-'}</td>
+                    <td>
+                        <button onclick="editVehicle(${v.vehicle_id})" class="btn-icon">✏️</button>
+                        <button onclick="viewHistory(${v.vehicle_id})" class="btn-icon">📜</button>
+                        <button onclick="deleteVehicle(${v.vehicle_id})" class="btn-icon">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    async function searchVehicles() {
+        const params = {
+            model_name: document.getElementById('searchModel').value,
+            category_name: document.getElementById('searchCategory').value,
+            status: document.getElementById('filterStatus').value,
+        };
+
+        try {
+            const vehicles = await API.vehicles.search(params);
+            displayVehicles(vehicles);
+        } catch (error) {
+            console.error('Error searching vehicles:', error);
+        }
+    }
+
+    function resetFilters() {
+        document.getElementById('searchModel').value = '';
+        document.getElementById('searchCategory').value = '';
+        document.getElementById('filterStatus').value = '';
+        loadVehicles();
+    }
+
+    function openCreateModal() {
+        currentVehicleId = null;
+        document.getElementById('modalTitle').textContent = 'Добавить технику';
+        document.getElementById('vehicleForm').reset();
+        document.getElementById('vehicleModal').classList.add('active');
+    }
+
+    async function editVehicle(id) {
+        try {
+            const vehicle = await API.vehicles.getById(id);
+            currentVehicleId = id;
+
+            document.getElementById('modalTitle').textContent = 'Редактировать технику';
+            document.getElementById('modelId').value = vehicle.model_id;
+            document.getElementById('warehouseId').value = vehicle.warehouse_id;
+            document.getElementById('vin').value = vehicle.vin || '';
+            document.getElementById('serialNumber').value = vehicle.serial_number;
+            document.getElementById('manufactureYear').value = vehicle.manufacture_year;
+            document.getElementById('color').value = vehicle.color || '';
+            document.getElementById('price').value = vehicle.price;
+            document.getElementById('discount').value = vehicle.discount;
+            document.getElementById('status').value = vehicle.status;
+
+            document.getElementById('vehicleModal').classList.add('active');
+        } catch (error) {
+            console.error('Error loading vehicle:', error);
+            alert('Ошибка загрузки данных');
+        }
+    }
+
+    async function saveVehicle(event) {
+        event.preventDefault();
+
+        const data = {
+            model_id: parseInt(document.getElementById('modelId').value),
+            warehouse_id: parseInt(document.getElementById('warehouseId').value),
+            vin: document.getElementById('vin').value,
+            serial_number: document.getElementById('serialNumber').value,
+            manufacture_year: parseInt(document.getElementById('manufactureYear').value),
+            color: document.getElementById('color').value,
+            price: parseFloat(document.getElementById('price').value),
+            discount: parseFloat(document.getElementById('discount').value),
+            status: document.getElementById('status').value,
+        };
+
+        try {
+            if (currentVehicleId) {
+                await API.vehicles.update(currentVehicleId, data);
+            } else {
+                await API.vehicles.create(data);
+            }
+
+            closeModal();
+            loadVehicles();
+            alert('Сохранено успешно');
+        } catch (error) {
+            console.error('Error saving vehicle:', error);
+            alert('Ошибка сохранения');
+        }
+    }
+
+    async function deleteVehicle(id) {
+        if (!confirm('Вы уверены, что хотите удалить эту технику?')) return;
+
+        try {
+            await API.vehicles.delete(id);
+            loadVehicles();
+            alert('Удалено успешно');
+        } catch (error) {
+            console.error('Error deleting vehicle:', error);
+            alert('Ошибка удаления');
+        }
+    }
+
+    async function viewHistory(id) {
+        try {
+            const history = await API.vehicles.getHistory(id);
+            console.log('History:', history);
+            alert(`История изменений для техники #${id}\n\nСм. консоль для деталей`);
+        } catch (error) {
+            console.error('Error loading history:', error);
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('vehicleModal').classList.remove('active');
+    }
+
+    function getStatusColor(status) {
+        const colors = {
+            'В наличии': 'success',
+            'Продано': 'danger',
+            'Зарезервировано': 'warning',
+        };
+        return colors[status] || 'secondary';
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('ru-BY', {
+            style: 'decimal',
+            minimumFractionDigits: 2
+        }).format(value);
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadVehicles);
+</script>
+</body>
+</html>

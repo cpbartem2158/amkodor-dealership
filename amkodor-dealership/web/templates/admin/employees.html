@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сотрудники - Амкодор</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+<div class="admin-container">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>АМКОДОР</h2>
+            <p>Автосалон</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/admin/dashboard" class="nav-item">
+                <span class="icon">📊</span>
+                Дашборд
+            </a>
+            <a href="/admin/vehicles" class="nav-item">
+                <span class="icon">🚜</span>
+                Техника
+            </a>
+            <a href="/admin/sales" class="nav-item">
+                <span class="icon">💰</span>
+                Продажи
+            </a>
+            <a href="/admin/customers" class="nav-item">
+                <span class="icon">👥</span>
+                Клиенты
+            </a>
+            <a href="/admin/employees" class="nav-item active">
+                <span class="icon">👔</span>
+                Сотрудники
+            </a>
+            <a href="/admin/service" class="nav-item">
+                <span class="icon">🔧</span>
+                Сервис
+            </a>
+            <a href="/admin/reports" class="nav-item">
+                <span class="icon">📈</span>
+                Отчеты
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()" class="btn-logout">Выход</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="main-header">
+            <h1>Сотрудники</h1>
+            <button onclick="openCreateModal()" class="btn btn-primary">+ Добавить сотрудника</button>
+        </header>
+
+        <section class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ФИО</th>
+                    <th>Должность</th>
+                    <th>Филиал</th>
+                    <th>Email</th>
+                    <th>Телефон</th>
+                    <th>Зарплата</th>
+                    <th>Стаж</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody id="employeesTable">
+                <tr>
+                    <td colspan="10" style="text-align: center;">Загрузка...</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<div id="employeeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Новый сотрудник</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="employeeForm" onsubmit="saveEmployee(event)">
+            <div class="form-group">
+                <label class="form-label">Фамилия *</label>
+                <input type="text" id="lastName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Имя *</label>
+                <input type="text" id="firstName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Отчество</label>
+                <input type="text" id="middleName" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input type="email" id="email" class="form-control" required>
+            </div>
+            <div class="form-group" id="passwordField">
+                <label class="form-label">Пароль *</label>
+                <input type="password" id="password" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Телефон</label>
+                <input type="tel" id="phone" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Должность *</label>
+                <select id="positionId" class="form-control" required>
+                    <option value="">Выберите должность</option>
+                    <option value="1">Менеджер по продажам</option>
+                    <option value="2">Старший менеджер</option>
+                    <option value="3">Механик</option>
+                    <option value="4">Мастер сервиса</option>
+                    <option value="8">Администратор</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Филиал</label>
+                <select id="warehouseId" class="form-control">
+                    <option value="">Не указан</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Зарплата</label>
+                <input type="number" step="0.01" id="salary" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="isActive" checked> Активен
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script>
+    let currentEmployeeId = null;
+
+    async function loadEmployees() {
+        try {
+            const employees = await API.employees.getAll({ limit: 100 });
+            displayEmployees(employees);
+        } catch (error) {
+            console.error('Error loading employees:', error);
+            alert('Ошибка загрузки данных');
+        }
+    }
+
+    async function loadWarehouses() {
+        try {
+            const warehouses = await API.warehouses.getAll();
+            const select = document.getElementById('warehouseId');
+            select.innerHTML = '<option value="">Не указан</option>' +
+                warehouses.map(w => `<option value="${w.warehouse_id}">${w.warehouse_name}</option>`).join('');
+        } catch (error) {
+            console.error('Error loading warehouses:', error);
+        }
+    }
+
+    function displayEmployees(employees) {
+        const tbody = document.getElementById('employeesTable');
+
+        if (!employees || employees.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Нет данных</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = employees.map(e => `
+                <tr>
+                    <td>${e.employee_id}</td>
+                    <td>${e.full_name || `${e.last_name} ${e.first_name}`}</td>
+                    <td>${e.position_name || '-'}</td>
+                    <td>${e.warehouse_name || '-'}</td>
+                    <td>${e.email || '-'}</td>
+                    <td>${e.phone || '-'}</td>
+                    <td>${e.salary ? formatCurrency(e.salary) : '-'}</td>
+                    <td>${e.years_of_service || 0} лет</td>
+                    <td><span class="badge badge-${e.is_active ? 'success' : 'danger'}">${e.is_active ? 'Активен' : 'Неактивен'}</span></td>
+                    <td>
+                        <button onclick="editEmployee(${e.employee_id})" class="btn-icon">✏️</button>
+                        <button onclick="deleteEmployee(${e.employee_id})" class="btn-icon">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    function openCreateModal() {
+        currentEmployeeId = null;
+        document.getElementById('modalTitle').textContent = 'Новый сотрудник';
+        document.getElementById('employeeForm').reset();
+        document.getElementById('passwordField').style.display = 'block';
+        document.getElementById('password').required = true;
+        document.getElementById('employeeModal').classList.add('active');
+        loadWarehouses();
+    }
+
+    async function editEmployee(id) {
+        try {
+            const employee = await API.employees.getById(id);
+            currentEmployeeId = id;
+
+            document.getElementById('modalTitle').textContent = 'Редактировать сотрудника';
+            document.getElementById('firstName').value = employee.first_name;
+            document.getElementById('lastName').value = employee.last_name;
+            document.getElementById('middleName').value = employee.middle_name || '';
+            document.getElementById('email').value = employee.email || '';
+            document.getElementById('phone').value = employee.phone || '';
+            document.getElementById('positionId').value = employee.position_id;
+            document.getElementById('warehouseId').value = employee.warehouse_id || '';
+            document.getElementById('salary').value = employee.salary || '';
+            document.getElementById('isActive').checked = employee.is_active;
+
+            document.getElementById('passwordField').style.display = 'none';
+            document.getElementById('password').required = false;
+
+            document.getElementById('employeeModal').classList.add('active');
+            loadWarehouses();
+        } catch (error) {
+            console.error('Error loading employee:', error);
+            alert('Ошибка загрузки данных');
+        }
+    }
+
+    async function saveEmployee(event) {
+        event.preventDefault();
+
+        const data = {
+            first_name: document.getElementById('firstName').value,
+            last_name: document.getElementById('lastName').value,
+            middle_name: document.getElementById('middleName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            position_id: parseInt(document.getElementById('positionId').value),
+            warehouse_id: document.getElementById('warehouseId').value ? parseInt(document.getElementById('warehouseId').value) : null,
+            salary: document.getElementById('salary').value ? parseFloat(document.getElementById('salary').value) : null,
+            is_active: document.getElementById('isActive').checked,
+        };
+
+        if (!currentEmployeeId) {
+            data.password = document.getElementById('password').value;
+        }
+
+        try {
+            if (currentEmployeeId) {
+                await API.employees.update(currentEmployeeId, data);
+            } else {
+                await API.employees.create(data);
+            }
+
+            closeModal();
+            loadEmployees();
+            alert('Сохранено успешно');
+        } catch (error) {
+            console.error('Error saving employee:', error);
+            alert('Ошибка сохранения');
+        }
+    }
+
+    async function deleteEmployee(id) {
+        if (!confirm('Удалить сотрудника?')) return;
+
+        try {
+            await API.employees.delete(id);
+            loadEmployees();
+            alert('Удалено');
+        } catch (error) {
+            console.error('Error deleting employee:', error);
+            alert('Ошибка удаления');
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('employeeModal').classList.remove('active');
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('ru-BY', {
+            minimumFractionDigits: 2
+        }).format(value) + ' BYN';
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadEmployees);
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/001_create_tables.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/002_create_views.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/003_create_functions.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/004_create_procedures.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/005_create_triggers.sql" dialect="PostgreSQL" />
+    <file url="PROJECT" dialect="PostgreSQL" />
+  </component>
+</project>

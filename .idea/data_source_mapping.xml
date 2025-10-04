@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/001_create_tables.sql" value="9c8b7e45-80dd-436f-83c9-f689770cf016" />
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/002_create_views.sql" value="9c8b7e45-80dd-436f-83c9-f689770cf016" />
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/003_create_functions.sql" value="9c8b7e45-80dd-436f-83c9-f689770cf016" />
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/004_create_procedures.sql" value="9c8b7e45-80dd-436f-83c9-f689770cf016" />
+    <file url="file://$PROJECT_DIR$/amkodor-dealership/internal/database/migrations/005_create_triggers.sql" value="9c8b7e45-80dd-436f-83c9-f689770cf016" />
+  </component>
+</project>

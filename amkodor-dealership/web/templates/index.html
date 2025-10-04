@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Амкодор - Официальный дилер спецтехники</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .btn-login {
+            background: white;
+            color: #2563eb;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 120px 2rem 80px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #2563eb;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-primary:hover, .btn-secondary:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Categories Section */
+        .categories {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #1f2937;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .category-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .category-card p {
+            color: #6b7280;
+        }
+
+        /* Features Section */
+        .features {
+            background: #f9fafb;
+            padding: 4rem 2rem;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-item {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .feature-item h4 {
+            color: #2563eb;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        /* Footer */
+        footer {
+            background: #1f2937;
+            color: white;
+            padding: 3rem 2rem 1rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            color: #2563eb;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #d1d5db;
+            text-decoration: none;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #374151;
+            color: #9ca3af;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo">АМКОДОР</div>
+        <ul class="nav-links">
+            <li><a href="#catalog">Каталог</a></li>
+            <li><a href="#about">О нас</a></li>
+            <li><a href="#contacts">Контакты</a></li>
+        </ul>
+        <a href="/login" class="btn-login">Войти</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <h1>Официальный дилер спецтехники АМКОДОР</h1>
+    <p>Широкий выбор строительной, коммунальной и дорожной техники</p>
+    <div class="hero-buttons">
+        <a href="#catalog" class="btn-primary">Смотреть каталог</a>
+        <a href="#contacts" class="btn-secondary">Связаться с нами</a>
+    </div>
+</section>
+
+<section id="catalog" class="categories">
+    <h2 class="section-title">Категории техники</h2>
+    <div class="category-grid">
+        <div class="category-card">
+            <div class="category-icon">🚜</div>
+            <h3>Дорожно-строительная</h3>
+            <p>Экскаваторы, бульдозеры, грейдеры</p>
+        </div>
+        <div class="category-card">
+            <div class="category-icon">🏗️</div>
+            <h3>Погрузочная техника</h3>
+            <p>Фронтальные и вилочные погрузчики</p>
+        </div>
+        <div class="category-card">
+            <div class="category-icon">🚛</div>
+            <h3>Коммунальная техника</h3>
+            <p>Уборочные машины, мусоровозы</p>
+        </div>
+        <div class="category-card">
+            <div class="category-icon">🌲</div>
+            <h3>Лесная техника</h3>
+            <p>Трелевочные тракторы</p>
+        </div>
+        <div class="category-card">
+            <div class="category-icon">🚜</div>
+            <h3>Сельхозтехника</h3>
+            <p>Тракторы МТЗ и навесное оборудование</p>
+        </div>
+        <div class="category-card">
+            <div class="category-icon">🔧</div>
+            <h3>Запчасти и сервис</h3>
+            <p>Оригинальные запчасти и ТО</p>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="features-container">
+        <h2 class="section-title">Наши преимущества</h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <h4>✅ Официальный дилер</h4>
+                <p>Работаем напрямую с производителем Амкодор</p>
+            </div>
+            <div class="feature-item">
+                <h4>🚚 Доставка по Беларуси</h4>
+                <p>Организуем доставку техники в любой регион</p>
+            </div>
+            <div class="feature-item">
+                <h4>💰 Выгодные условия</h4>
+                <p>Кредит, лизинг, рассрочка, индивидуальные скидки</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔧 Сервисное обслуживание</h4>
+                <p>Собственный сервисный центр и оригинальные запчасти</p>
+            </div>
+            <div class="feature-item">
+                <h4>🚗 Тест-драйв</h4>
+                <p>Возможность протестировать технику перед покупкой</p>
+            </div>
+            <div class="feature-item">
+                <h4>📋 Гарантия</h4>
+                <p>Официальная гарантия от производителя</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer id="contacts">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>О компании</h4>
+            <p>Официальный дилер техники Амкодор в Республике Беларусь. Предлагаем широкий выбор спецтехники для различных отраслей.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Наши филиалы</h4>
+            <ul>
+                <li>📍 Минск, ул. Промышленная, 1</li>
+                <li>📍 Гродно, ул. Складская, 15</li>
+                <li>📍 Витебск, пр. Московский, 88</li>
+                <li>📍 Брест, ул. Московская, 250</li>
+                <li>📍 Гомель, ул. Речицкое шоссе, 100</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Контакты</h4>
+            <ul>
+                <li>📞 +375 17 200-00-00</li>
+                <li>📧 info@amkodor-dealer.by</li>
+                <li>🕒 Пн-Пт: 9:00 - 18:00</li>
+                <li>🕒 Сб: 10:00 - 15:00</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Полезное</h4>
+            <ul>
+                <li><a href="#catalog">Каталог техники</a></li>
+                <li><a href="/login">Личный кабинет</a></li>
+                <li><a href="#contacts">Контакты</a></li>
+                <li><a href="#">Гарантия и сервис</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 Амкодор Дилер. Все права защищены.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Система управления автосалоном v1.0</p>
+    </div>
+</footer>
+
+<script>
+    // Плавная прокрутка к якорям
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

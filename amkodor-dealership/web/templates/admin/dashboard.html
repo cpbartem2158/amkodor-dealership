@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель - Амкодор</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+<div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>АМКОДОР</h2>
+            <p>Автосалон</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/admin/dashboard" class="nav-item active">
+                <span class="icon">📊</span>
+                Дашборд
+            </a>
+            <a href="/admin/vehicles" class="nav-item">
+                <span class="icon">🚜</span>
+                Техника
+            </a>
+            <a href="/admin/sales" class="nav-item">
+                <span class="icon">💰</span>
+                Продажи
+            </a>
+            <a href="/admin/customers" class="nav-item">
+                <span class="icon">👥</span>
+                Клиенты
+            </a>
+            <a href="/admin/employees" class="nav-item">
+                <span class="icon">👔</span>
+                Сотрудники
+            </a>
+            <a href="/admin/service" class="nav-item">
+                <span class="icon">🔧</span>
+                Сервис
+            </a>
+            <a href="/admin/reports" class="nav-item">
+                <span class="icon">📈</span>
+                Отчеты
+            </a>
+            <a href="/admin/settings" class="nav-item">
+                <span class="icon">⚙️</span>
+                Настройки
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()" class="btn-logout">Выход</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="main-header">
+            <h1>Панель управления</h1>
+            <div class="user-info">
+                <span id="userName">Загрузка...</span>
+                <div class="user-avatar">👤</div>
+            </div>
+        </header>
+
+        <!-- Statistics Cards -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🚜</div>
+                <div class="stat-info">
+                    <h3>Техника в наличии</h3>
+                    <p class="stat-value" id="availableVehicles">-</p>
+                    <span class="stat-label">единиц</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-info">
+                    <h3>Продаж за месяц</h3>
+                    <p class="stat-value" id="salesLastMonth">-</p>
+                    <span class="stat-label">сделок</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-info">
+                    <h3>Выручка за месяц</h3>
+                    <p class="stat-value" id="revenueLastMonth">-</p>
+                    <span class="stat-label">BYN</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <h3>Всего клиентов</h3>
+                    <p class="stat-value" id="totalCustomers">-</p>
+                    <span class="stat-label">чел.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="chart-card">
+                <h3>Продажи по месяцам</h3>
+                <canvas id="salesChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Топ категорий</h3>
+                <canvas id="categoriesChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="activity-section">
+            <div class="activity-card">
+                <h3>Последние продажи</h3>
+                <div id="recentSales" class="activity-list">
+                    <p class="loading">Загрузка...</p>
+                </div>
+            </div>
+
+            <div class="activity-card">
+                <h3>Запланированные тест-драйвы</h3>
+                <div id="upcomingTestDrives" class="activity-list">
+                    <p class="loading">Загрузка...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/api.js"></script>
+<script src="/static/js/charts.js"></script>
+<script src="/static/js/admin.js"></script>
+<script>
+    // Загрузка статистики при загрузке страницы
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadDashboardData();
+    });
+
+    async function loadDashboardData() {
+        try {
+            // Загрузка статистики
+            const stats = await API.get('/admin/dashboard');
+
+            document.getElementById('availableVehicles').textContent = stats.available_vehicles || 0;
+            document.getElementById('salesLastMonth').textContent = stats.sales_last_month || 0;
+            document.getElementById('revenueLastMonth').textContent = formatCurrency(stats.revenue_last_month || 0);
+            document.getElementById('totalCustomers').textContent = stats.total_customers || 0;
+
+            // Загрузка данных для графиков
+            const chartData = await API.get('/admin/dashboard/charts');
+            renderCharts(chartData);
+
+            // Загрузка последних продаж
+            await loadRecentSales();
+
+            // Загрузка тест-драйвов
+            await loadUpcomingTestDrives();
+
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            showError('Ошибка загрузки данных');
+        }
+    }
+
+    async function loadRecentSales() {
+        try {
+            const sales = await API.get('/admin/sales?limit=5');
+            const container = document.getElementById('recentSales');
+
+            if (!sales || sales.length === 0) {
+                container.innerHTML = '<p class="empty">Нет данных</p>';
+                return;
+            }
+
+            container.innerHTML = sales.map(sale => `
+                    <div class="activity-item">
+                        <div class="activity-icon">💰</div>
+                        <div class="activity-content">
+                            <p class="activity-title">${sale.model_name}</p>
+                            <p class="activity-desc">${sale.client_name} - ${formatCurrency(sale.final_price)}</p>
+                            <p class="activity-time">${formatDate(sale.sale_date)}</p>
+                        </div>
+                    </div>
+                `).join('');
+        } catch (error) {
+            console.error('Error loading recent sales:', error);
+        }
+    }
+
+    async function loadUpcomingTestDrives() {
+        try {
+            const testDrives = await API.get('/admin/test-drives?limit=5&status=Запланирован');
+            const container = document.getElementById('upcomingTestDrives');
+
+            if (!testDrives || testDrives.length === 0) {
+                container.innerHTML = '<p class="empty">Нет запланированных</p>';
+                return;
+            }
+
+            container.innerHTML = testDrives.map(td => `
+                    <div class="activity-item">
+                        <div class="activity-icon">🚗</div>
+                        <div class="activity-content">
+                            <p class="activity-title">${td.model_name}</p>
+                            <p class="activity-desc">${td.client_name}</p>
+                            <p class="activity-time">${formatDateTime(td.scheduled_date)}</p>
+                        </div>
+                    </div>
+                `).join('');
+        } catch (error) {
+            console.error('Error loading test drives:', error);
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    }
+</script>
+</body>
+</html> renderCharts(data) {
+// График продаж по месяцам
+const salesCtx = document.getElementById('salesChart').getContext('2d');
+new Chart(salesCtx, {
+type: 'line',
+data: {
+labels: data.months || [],
+datasets: [{
+label: 'Продажи',
+data: data.sales || [],
+borderColor: '#2563eb',
+backgroundColor: 'rgba(37, 99, 235, 0.1)',
+tension: 0.4
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+legend: {
+display: false
+}
+}
+}
+});
+
+// График по категориям
+const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
+new Chart(categoriesCtx, {
+type: 'doughnut',
+data: {
+labels: data.categories || [],
+datasets: [{
+data: data.category_sales || [],
+backgroundColor: [
+'#2563eb',
+'#10b981',
+'#f59e0b',
+'#ef4444',
+'#8b5cf6'
+]
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+legend: {
+position: 'bottom'
+}
+}
+}
+});
+}
+
+function formatCurrency(value) {
+return new Intl.NumberFormat('ru-BY', {
+style: 'decimal',
+minimumFractionDigits: 2,
+maximumFractionDigits: 2
+}).format(value);
+}
+
+function formatDate(date) {
+return new Date(date).toLocaleDateString('ru-BY');
+}
+
+function formatDateTime(date) {
+return new Date(date).toLocaleString('ru-BY');
+}
+
+function showError(message) {
+alert(message); // Можно заменить на более красивое уведомление
+}
+
+function

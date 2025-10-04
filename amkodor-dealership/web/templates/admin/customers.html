@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Клиенты - Амкодор</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+<div class="admin-container">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>АМКОДОР</h2>
+            <p>Автосалон</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/admin/dashboard" class="nav-item">
+                <span class="icon">📊</span>
+                Дашборд
+            </a>
+            <a href="/admin/vehicles" class="nav-item">
+                <span class="icon">🚜</span>
+                Техника
+            </a>
+            <a href="/admin/sales" class="nav-item">
+                <span class="icon">💰</span>
+                Продажи
+            </a>
+            <a href="/admin/customers" class="nav-item active">
+                <span class="icon">👥</span>
+                Клиенты
+            </a>
+            <a href="/admin/employees" class="nav-item">
+                <span class="icon">👔</span>
+                Сотрудники
+            </a>
+            <a href="/admin/service" class="nav-item">
+                <span class="icon">🔧</span>
+                Сервис
+            </a>
+            <a href="/admin/reports" class="nav-item">
+                <span class="icon">📈</span>
+                Отчеты
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()" class="btn-logout">Выход</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="main-header">
+            <h1>Клиенты</h1>
+            <div>
+                <button onclick="switchTab('individual')" id="btnIndividual" class="btn btn-primary">Физ. лица</button>
+                <button onclick="switchTab('corporate')" id="btnCorporate" class="btn btn-secondary">Юр. лица</button>
+                <button onclick="openCreateModal()" class="btn btn-primary">+ Добавить клиента</button>
+            </div>
+        </header>
+
+        <!-- Фильтры -->
+        <section class="filters-section">
+            <div class="filters">
+                <input type="text" id="searchTerm" placeholder="Поиск по имени/названию" class="form-control">
+                <input type="text" id="searchPhone" placeholder="Телефон" class="form-control">
+                <input type="text" id="searchEmail" placeholder="Email" class="form-control">
+                <button onclick="searchClients()" class="btn btn-secondary">Поиск</button>
+                <button onclick="resetFilters()" class="btn">Сбросить</button>
+            </div>
+        </section>
+
+        <!-- Таблица физических лиц -->
+        <section id="individualTab" class="table-container">
+            <h3>Физические лица</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ФИО</th>
+                    <th>Телефон</th>
+                    <th>Email</th>
+                    <th>Скидка</th>
+                    <th>VIP</th>
+                    <th>Покупок</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody id="customersTable">
+                <tr>
+                    <td colspan="8" style="text-align: center;">Загрузка...</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Таблица юридических лиц -->
+        <section id="corporateTab" class="table-container" style="display: none;">
+            <h3>Юридические лица</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>УНП</th>
+                    <th>Контактное лицо</th>
+                    <th>Телефон</th>
+                    <th>Email</th>
+                    <th>Скидка</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody id="corporateTable">
+                <tr>
+                    <td colspan="8" style="text-align: center;">Загрузка...</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<!-- Модальное окно для физ. лиц -->
+<div id="customerModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Новый клиент</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="customerForm" onsubmit="saveCustomer(event)">
+            <div class="form-group">
+                <label class="form-label">Фамилия *</label>
+                <input type="text" id="lastName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Имя *</label>
+                <input type="text" id="firstName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Отчество</label>
+                <input type="text" id="middleName" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Телефон *</label>
+                <input type="tel" id="phone" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Адрес</label>
+                <textarea id="address" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Скидка (%)</label>
+                <input type="number" step="0.01" id="discountPercent" class="form-control" value="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="isVip"> VIP клиент
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно для юр. лиц -->
+<div id="corporateModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="corporateModalTitle">Новая компания</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="corporateForm" onsubmit="saveCorporate(event)">
+            <div class="form-group">
+                <label class="form-label">Название компании *</label>
+                <input type="text" id="companyName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">УНП *</label>
+                <input type="text" id="taxId" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Юридический адрес *</label>
+                <textarea id="legalAddress" class="form-control" rows="2" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Контактное лицо</label>
+                <input type="text" id="contactPerson" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Телефон *</label>
+                <input type="tel" id="corpPhone" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="corpEmail" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Скидка (%)</label>
+                <input type="number" step="0.01" id="corpDiscountPercent" class="form-control" value="0">
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script>
+    let currentTab = 'individual';
+    let currentCustomerId = null;
+    let currentCorporateId = null;
+
+    async function loadCustomers() {
+        try {
+            const customers = await API.customers.getAll({ limit: 100 });
+            displayCustomers(customers);
+        } catch (error) {
+            console.error('Error loading customers:', error);
+        }
+    }
+
+    async function loadCorporate() {
+        try {
+            const corporate = await API.corporateClients.getAll({ limit: 100 });
+            displayCorporate(corporate);
+        } catch (error) {
+            console.error('Error loading corporate clients:', error);
+        }
+    }
+
+    function displayCustomers(customers) {
+        const tbody = document.getElementById('customersTable');
+
+        if (!customers || customers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Нет данных</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = customers.map(c => `
+                <tr>
+                    <td>${c.customer_id}</td>
+                    <td>${c.last_name} ${c.first_name}</td>
+                    <td>${c.phone}</td>
+                    <td>${c.email || '-'}</td>
+                    <td>${c.discount_percent}%</td>
+                    <td>${c.is_vip ? '⭐ VIP' : '-'}</td>
+                    <td>${c.total_purchases || 0}</td>
+                    <td>
+                        <button onclick="editCustomer(${c.customer_id})" class="btn-icon">✏️</button>
+                        <button onclick="deleteCustomer(${c.customer_id})" class="btn-icon">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    function displayCorporate(corporate) {
+        const tbody = document.getElementById('corporateTable');
+
+        if (!corporate || corporate.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Нет данных</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = corporate.map(c => `
+                <tr>
+                    <td>${c.corporate_client_id}</td>
+                    <td>${c.company_name}</td>
+                    <td>${c.tax_id}</td>
+                    <td>${c.contact_person || '-'}</td>
+                    <td>${c.phone}</td>
+                    <td>${c.email || '-'}</td>
+                    <td>${c.discount_percent}%</td>
+                    <td>
+                        <button onclick="editCorporate(${c.corporate_client_id})" class="btn-icon">✏️</button>
+                        <button onclick="deleteCorporate(${c.corporate_client_id})" class="btn-icon">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+
+        if (tab === 'individual') {
+            document.getElementById('individualTab').style.display = 'block';
+            document.getElementById('corporateTab').style.display = 'none';
+            document.getElementById('btnIndividual').className = 'btn btn-primary';
+            document.getElementById('btnCorporate').className = 'btn btn-secondary';
+            loadCustomers();
+        } else {
+            document.getElementById('individualTab').style.display = 'none';
+            document.getElementById('corporateTab').style.display = 'block';
+            document.getElementById('btnIndividual').className = 'btn btn-secondary';
+            document.getElementById('btnCorporate').className = 'btn btn-primary';
+            loadCorporate();
+        }
+    }
+
+    function openCreateModal() {
+        if (currentTab === 'individual') {
+            currentCustomerId = null;
+            document.getElementById('customerForm').reset();
+            document.getElementById('customerModal').classList.add('active');
+        } else {
+            currentCorporateId = null;
+            document.getElementById('corporateForm').reset();
+            document.getElementById('corporateModal').classList.add('active');
+        }
+    }
+
+    async function editCustomer(id) {
+        try {
+            const customer = await API.customers.getById(id);
+            currentCustomerId = id;
+
+            document.getElementById('lastName').value = customer.last_name;
+            document.getElementById('firstName').value = customer.first_name;
+            document.getElementById('middleName').value = customer.middle_name || '';
+            document.getElementById('phone').value = customer.phone;
+            document.getElementById('email').value = customer.email || '';
+            document.getElementById('address').value = customer.address || '';
+            document.getElementById('discountPercent').value = customer.discount_percent;
+            document.getElementById('isVip').checked = customer.is_vip;
+
+            document.getElementById('customerModal').classList.add('active');
+        } catch (error) {
+            console.error('Error loading customer:', error);
+        }
+    }
+
+    async function saveCustomer(event) {
+        event.preventDefault();
+
+        const data = {
+            last_name: document.getElementById('lastName').value,
+            first_name: document.getElementById('firstName').value,
+            middle_name: document.getElementById('middleName').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            address: document.getElementById('address').value,
+            discount_percent: parseFloat(document.getElementById('discountPercent').value),
+            is_vip: document.getElementById('isVip').checked,
+        };
+
+        try {
+            if (currentCustomerId) {
+                await API.customers.update(currentCustomerId, data);
+            } else {
+                await API.customers.create(data);
+            }
+
+            closeModal();
+            loadCustomers();
+            alert('Сохранено успешно');
+        } catch (error) {
+            console.error('Error saving customer:', error);
+            alert('Ошибка сохранения');
+        }
+    }
+
+    async function deleteCustomer(id) {
+        if (!confirm('Удалить клиента?')) return;
+
+        try {
+            await API.customers.delete(id);
+            loadCustomers();
+            alert('Удалено');
+        } catch (error) {
+            console.error('Error deleting customer:', error);
+            alert('Ошибка удаления');
+        }
+    }
+
+    async function editCorporate(id) {
+        try {
+            const corp = await API.corporateClients.getById(id);
+            currentCorporateId = id;
+
+            document.getElementById('companyName').value = corp.company_name;
+            document.getElementById('taxId').value = corp.tax_id;
+            document.getElementById('legalAddress').value = corp.legal_address;
+            document.getElementById('contactPerson').value = corp.contact_person || '';
+            document.getElementById('corpPhone').value = corp.phone;
+            document.getElementById('corpEmail').value = corp.email || '';
+            document.getElementById('corpDiscountPercent').value = corp.discount_percent;
+
+            document.getElementById('corporateModal').classList.add('active');
+        } catch (error) {
+            console.error('Error loading corporate client:', error);
+        }
+    }
+
+    async function saveCorporate(event) {
+        event.preventDefault();
+
+        const data = {
+            company_name: document.getElementById('companyName').value,
+            tax_id: document.getElementById('taxId').value,
+            legal_address: document.getElementById('legalAddress').value,
+            contact_person: document.getElementById('contactPerson').value,
+            phone: document.getElementById('corpPhone').value,
+            email: document.getElementById('corpEmail').value,
+            discount_percent: parseFloat(document.getElementById('corpDiscountPercent').value),
+        };
+
+        try {
+            if (currentCorporateId) {
+                await API.corporateClients.update(currentCorporateId, data);
+            } else {
+                await API.corporateClients.create(data);
+            }
+
+            closeModal();
+            loadCorporate();
+            alert('Сохранено успешно');
+        } catch (error) {
+            console.error('Error saving corporate client:', error);
+            alert('Ошибка сохранения');
+        }
+    }
+
+    async function deleteCorporate(id) {
+        if (!confirm('Удалить компанию?')) return;
+
+        try {
+            await API.corporateClients.delete(id);
+            loadCorporate();
+            alert('Удалено');
+        } catch (error) {
+            console.error('Error deleting corporate client:', error);
+            alert('Ошибка удаления');
+        }
+    }
+
+    function searchClients() {
+        const params = {
+            search_term: document.getElementById('searchTerm').value,
+            phone: document.getElementById('searchPhone').value,
+            email: document.getElementById('searchEmail').value,
+        };
+
+        if (currentTab === 'individual') {
+            API.customers.search(params).then(displayCustomers);
+        }
+    }
+
+    function resetFilters() {
+        document.getElementById('searchTerm').value = '';
+        document.getElementById('searchPhone').value = '';
+        document.getElementById('searchEmail').value = '';
+
+        if (currentTab === 'individual') {
+            loadCustomers();
+        } else {
+            loadCorporate();
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('customerModal').classList.remove('active');
+        document.getElementById('corporateModal').classList.remove('active');
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCustomers();
+    });
+</script>
+</body>
+</html>
