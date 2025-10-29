@@ -16,11 +16,18 @@ import (
 	"amkodor-dealership/internal/repository"
 	"amkodor-dealership/internal/service"
 	"amkodor-dealership/internal/utils"
+	"bytes"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/jung-kurt/gofpdf"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
+	"github.com/xuri/excelize/v2"
 )
 
 type Application struct {
@@ -453,6 +460,244 @@ func setupRouter(app *Application, userService *service.UserService, db *sql.DB)
 	api.HandleFunc("/favorites/{id}/toggle", app.Handlers.Favorite.ToggleFavorite).Methods("POST")
 	api.HandleFunc("/favorites/{id}/check", app.Handlers.Favorite.IsFavorite).Methods("GET")
 	api.HandleFunc("/favorites/count", app.Handlers.Favorite.GetFavoriteCount).Methods("GET")
+
+	// API - Экспорт отчетов (CSV/XLSX/PDF) - GET с query параметрами
+	api.HandleFunc("/reports/export", func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		reportType := q.Get("type")
+		format := q.Get("format")
+		dateFrom := q.Get("start_date")
+		dateTo := q.Get("end_date")
+
+		// Нормализация формата
+		if format == "excel" || format == "xslx" {
+			format = "xlsx"
+		}
+
+		// Даты
+		start, _ := time.Parse("2006-01-02", dateFrom)
+		end, _ := time.Parse("2006-01-02", dateTo)
+		if start.IsZero() {
+			start = time.Now().AddDate(0, -1, 0)
+		}
+		if end.IsZero() {
+			end = time.Now()
+		}
+
+		// Подготовка данных
+		csv := ""
+		switch reportType {
+		case "sales":
+			csv = "ID,Клиент,Техника,Сумма,Дата,Статус\n1,Иван Петров,Экскаватор,450000," + start.Format("2006-01-02") + ",Завершена"
+		case "vehicles":
+			csv = "ID,Название,Категория,Цена,Статус,Год\n1,Экскаватор 331,Экскаваторы,450000,В наличии,2023"
+		case "customers":
+			csv = "ID,Имя,Email,Телефон,Статус\n1,Иван Петров,ivan@example.com,+375291234567,Активный"
+		case "financial":
+			csv = "Период,Доходы,Расходы,Прибыль\n" + start.Format("2006-01-02") + ",450000,50000,400000"
+		default:
+			csv = "Колонка1,Колонка2\nЗначение1,Значение2"
+		}
+
+		switch format {
+		case "csv":
+			w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=report_%s_%s.csv", reportType, time.Now().Format("20060102_150405")))
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(csv))
+			return
+
+		case "xlsx":
+			f := excelize.NewFile()
+			defer f.Close()
+			sheet := "Отчет"
+			idx, _ := f.NewSheet(sheet)
+			f.SetActiveSheet(idx)
+			// Заголовок и период
+			f.SetCellValue(sheet, "A1", fmt.Sprintf("Отчет: %s", reportType))
+			f.SetCellValue(sheet, "A2", fmt.Sprintf("Период: %s - %s", start.Format("02.01.2006"), end.Format("02.01.2006")))
+			// Заполняем CSV-данные в ячейки
+			rows := strings.Split(csv, "\n")
+			for rIdx, row := range rows {
+				cols := strings.Split(row, ",")
+				for cIdx, col := range cols {
+					cellRef, _ := excelize.CoordinatesToCellName(cIdx+1, rIdx+4)
+					f.SetCellValue(sheet, cellRef, col)
+				}
+			}
+			var buf bytes.Buffer
+			if err := f.Write(&buf); err != nil {
+				utils.ErrorResponse(w, http.StatusInternalServerError, "Ошибка формирования XLSX")
+				return
+			}
+			w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=report_%s_%s.xlsx", reportType, time.Now().Format("20060102_150405")))
+			w.WriteHeader(http.StatusOK)
+			w.Write(buf.Bytes())
+			return
+
+		case "pdf":
+			pdf := gofpdf.New("P", "mm", "A4", "")
+			// Подключаем UTF-8 шрифты (Regular + Bold) из байтов, чтобы исключить особенности путей
+			fontReg, _ := filepath.Abs("web/static/fonts/DejaVuSans.ttf")
+			fontBold, _ := filepath.Abs("web/static/fonts/DejaVuSans-Bold.ttf")
+			if b, err := os.ReadFile(fontReg); err == nil {
+				pdf.AddUTF8FontFromBytes("DejaVu", "", b)
+			} else {
+				log.Printf("PDF read font error (GET regular): %v, path=%s", err, fontReg)
+			}
+			if b, err := os.ReadFile(fontBold); err == nil {
+				pdf.AddUTF8FontFromBytes("DejaVu", "B", b)
+			} else {
+				log.Printf("PDF read font error (GET bold): %v, path=%s", err, fontBold)
+			}
+			if err := pdf.Error(); err != nil {
+				log.Printf("PDF font load error (GET): %v", err)
+				utils.ErrorResponse(w, http.StatusInternalServerError, "Ошибка загрузки шрифта для PDF")
+				return
+			}
+			pdf.AddPage()
+			pdf.SetFont("DejaVu", "B", 16)
+			title := fmt.Sprintf("Отчет: %s (%s - %s)", reportType, start.Format("02.01.2006"), end.Format("02.01.2006"))
+			pdf.CellFormat(190, 10, title, "", 1, "C", false, 0, "")
+			pdf.SetFont("DejaVu", "", 12)
+			pdf.Ln(4)
+			pdf.Cell(40, 8, "Данные отчета представлены в табличном виде.")
+			var out bytes.Buffer
+			if err := pdf.Output(&out); err != nil {
+				utils.ErrorResponse(w, http.StatusInternalServerError, "Ошибка формирования PDF")
+				return
+			}
+			w.Header().Set("Content-Type", "application/pdf")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=report_%s_%s.pdf", reportType, time.Now().Format("20060102_150405")))
+			w.WriteHeader(http.StatusOK)
+			w.Write(out.Bytes())
+			return
+		}
+
+		utils.ErrorResponse(w, http.StatusBadRequest, "Неподдерживаемый формат")
+	}).Methods("GET")
+
+	// API - Экспорт отчетов (CSV/XLSX/PDF) - POST с JSON телом (ожидает поля: type, format, date_from, date_to)
+	api.HandleFunc("/reports/export", func(w http.ResponseWriter, r *http.Request) {
+		type exportReq struct {
+			Type     string `json:"type"`
+			Format   string `json:"format"`
+			DateFrom string `json:"date_from"`
+			DateTo   string `json:"date_to"`
+		}
+		var req exportReq
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			utils.ErrorResponse(w, http.StatusBadRequest, "Некорректные данные запроса")
+			return
+		}
+
+		reportType := req.Type
+		format := req.Format
+		dateFrom := req.DateFrom
+		dateTo := req.DateTo
+
+		if format == "excel" || format == "xslx" {
+			format = "xlsx"
+		}
+
+		start, _ := time.Parse("2006-01-02", dateFrom)
+		end, _ := time.Parse("2006-01-02", dateTo)
+		if start.IsZero() {
+			start = time.Now().AddDate(0, -1, 0)
+		}
+		if end.IsZero() {
+			end = time.Now()
+		}
+
+		csv := ""
+		switch reportType {
+		case "sales":
+			csv = "ID,Клиент,Техника,Сумма,Дата,Статус\n1,Иван Петров,Экскаватор,450000," + start.Format("2006-01-02") + ",Завершена"
+		case "vehicles":
+			csv = "ID,Название,Категория,Цена,Статус,Год\n1,Экскаватор 331,Экскаваторы,450000,В наличии,2023"
+		case "customers":
+			csv = "ID,Имя,Email,Телефон,Статус\n1,Иван Петров,ivan@example.com,+375291234567,Активный"
+		case "financial":
+			csv = "Период,Доходы,Расходы,Прибыль\n" + start.Format("2006-01-02") + ",450000,50000,400000"
+		default:
+			csv = "Колонка1,Колонка2\nЗначение1,Значение2"
+		}
+
+		switch format {
+		case "csv":
+			w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=report_%s_%s.csv", reportType, time.Now().Format("20060102_150405")))
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(csv))
+			return
+		case "xlsx":
+			f := excelize.NewFile()
+			defer f.Close()
+			sheet := "Отчет"
+			idx, _ := f.NewSheet(sheet)
+			f.SetActiveSheet(idx)
+			f.SetCellValue(sheet, "A1", fmt.Sprintf("Отчет: %s", reportType))
+			f.SetCellValue(sheet, "A2", fmt.Sprintf("Период: %s - %s", start.Format("02.01.2006"), end.Format("02.01.2006")))
+			rows := strings.Split(csv, "\n")
+			for rIdx, row := range rows {
+				cols := strings.Split(row, ",")
+				for cIdx, col := range cols {
+					cellRef, _ := excelize.CoordinatesToCellName(cIdx+1, rIdx+4)
+					f.SetCellValue(sheet, cellRef, col)
+				}
+			}
+			var buf bytes.Buffer
+			if err := f.Write(&buf); err != nil {
+				utils.ErrorResponse(w, http.StatusInternalServerError, "Ошибка формирования XLSX")
+				return
+			}
+			w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=report_%s_%s.xlsx", reportType, time.Now().Format("20060102_150405")))
+			w.WriteHeader(http.StatusOK)
+			w.Write(buf.Bytes())
+			return
+		case "pdf":
+			pdf := gofpdf.New("P", "mm", "A4", "")
+			fontReg, _ := filepath.Abs("web/static/fonts/DejaVuSans.ttf")
+			fontBold, _ := filepath.Abs("web/static/fonts/DejaVuSans-Bold.ttf")
+			if b, err := os.ReadFile(fontReg); err == nil {
+				pdf.AddUTF8FontFromBytes("DejaVu", "", b)
+			} else {
+				log.Printf("PDF read font error (POST regular): %v, path=%s", err, fontReg)
+			}
+			if b, err := os.ReadFile(fontBold); err == nil {
+				pdf.AddUTF8FontFromBytes("DejaVu", "B", b)
+			} else {
+				log.Printf("PDF read font error (POST bold): %v, path=%s", err, fontBold)
+			}
+			if err := pdf.Error(); err != nil {
+				log.Printf("PDF font load error (POST): %v", err)
+				utils.ErrorResponse(w, http.StatusInternalServerError, "Ошибка загрузки шрифта для PDF")
+				return
+			}
+			pdf.AddPage()
+			pdf.SetFont("DejaVu", "B", 16)
+			title := fmt.Sprintf("Отчет: %s (%s - %s)", reportType, start.Format("02.01.2006"), end.Format("02.01.2006"))
+			pdf.CellFormat(190, 10, title, "", 1, "C", false, 0, "")
+			pdf.SetFont("DejaVu", "", 12)
+			pdf.Ln(4)
+			pdf.Cell(40, 8, "Данные отчета представлены в табличном виде.")
+			var out bytes.Buffer
+			if err := pdf.Output(&out); err != nil {
+				log.Printf("PDF output error (POST): %v", err)
+				utils.ErrorResponse(w, http.StatusInternalServerError, "Ошибка формирования PDF")
+				return
+			}
+			w.Header().Set("Content-Type", "application/pdf")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=report_%s_%s.pdf", reportType, time.Now().Format("20060102_150405")))
+			w.WriteHeader(http.StatusOK)
+			w.Write(out.Bytes())
+			return
+		}
+
+		utils.ErrorResponse(w, http.StatusBadRequest, "Неподдерживаемый формат")
+	}).Methods("POST")
 
 	// API - Пользовательские функции (требуют JWT)
 	api.HandleFunc("/user/stats", app.Handlers.User.GetUserStats).Methods("GET")

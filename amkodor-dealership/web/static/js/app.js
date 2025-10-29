@@ -173,35 +173,65 @@ function hideLoading() {
 // Проверка авторизации
 function checkAuth() {
     const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('userRole');
     const protectedPages = ['/admin'];
     const currentPath = window.location.pathname;
 
-    // Если пользователь на защищенной странице без токена - перенаправляем на логин
+    // 1) Защищаем только действительно защищенные разделы
     if (protectedPages.some(page => currentPath.startsWith(page)) && !token) {
         window.location.href = '/login';
         return;
     }
 
-    // Если пользователь на главной странице с токеном - проверяем роль
-    if (currentPath === '/' && token && userRole === 'admin') {
-        // Админы автоматически перенаправляются в админ панель
-        window.location.href = '/admin/dashboard';
+    // 2) Главную страницу НЕ редиректим автоматически ни при каких условиях
+    if (currentPath === '/') {
+        // Валидируем токен, чтобы не держать "битый" логин
+        validateAndSyncProfile();
         return;
     }
 
-    if (currentPath === '/' && token && userRole === 'user') {
-        // Обычные пользователи перенаправляются в дашборд
-        window.location.href = '/dashboard';
+    // 3) Для остальных страниц просто синхронизируем профиль (не делаем автологин)
+    validateAndSyncProfile();
+}
+
+// Проверяем токен на сервере, синхронизируем имя и роль; очищаем мусор при невалидном токене
+async function validateAndSyncProfile() {
+    const token = localStorage.getItem('token');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    if (!token) {
+        if (loginBtn) loginBtn.style.display = '';
+        if (logoutBtn) logoutBtn.style.display = 'none';
         return;
     }
 
-    // Показываем кнопку "Выйти" для авторизованных пользователей на главной странице
-    if (currentPath === '/' && token) {
+    try {
+        const res = await fetch('/api/auth/profile', {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('invalid token');
+        const data = await res.json();
+        if (data && data.data) {
+            const user = data.data;
+            // Сохраняем актуальные значения
+            if (user.name) localStorage.setItem('userName', user.name);
+            if (user.role) localStorage.setItem('userRole', user.role);
+
+            // Обновляем элементы интерфейса, если есть
+            const nameEl = document.getElementById('user-name');
+            if (nameEl) nameEl.textContent = user.name || 'Пользователь';
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (logoutBtn) logoutBtn.style.display = 'block';
+        }
+    } catch (e) {
+        // Токен невалиден — очищаем состояние
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userName');
         const loginBtn = document.getElementById('login-btn');
         const logoutBtn = document.getElementById('logout-btn');
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'block';
+        if (loginBtn) loginBtn.style.display = '';
+        if (logoutBtn) logoutBtn.style.display = 'none';
     }
 }
 

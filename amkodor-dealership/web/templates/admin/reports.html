@@ -273,7 +273,7 @@
         </nav>
 
         <!-- Sidebar -->
-        <aside class="sidebar">
+    <aside class="sidebar">
             <nav class="sidebar-menu">
                 <a href="/admin/dashboard" class="menu-item">
                     <span class="menu-icon">📊</span>
@@ -310,9 +310,9 @@
                 <a href="/admin/settings" class="menu-item">
                     <span class="menu-icon">⚙️</span>
                     <span class="menu-text">Настройки</span>
-                </a>
-            </nav>
-        </aside>
+            </a>
+        </nav>
+    </aside>
 
         <!-- Main Content -->
         <main class="admin-content">
@@ -326,11 +326,11 @@
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Период с:</label>
                         <input type="date" id="date-from" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
-                    </div>
+                </div>
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Период по:</label>
                         <input type="date" id="date-to" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
-                    </div>
+                        </div>
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Формат файла:</label>
                         <select id="file-format" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
@@ -338,7 +338,7 @@
                             <option value="pdf">PDF</option>
                             <option value="csv">CSV</option>
                         </select>
-                    </div>
+                        </div>
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Путь сохранения:</label>
                         <input type="text" id="save-path" placeholder="Выберите папку для сохранения" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; background: #f9fafb;">
@@ -359,21 +359,21 @@
                 <div class="report-description">Детальный анализ продаж за выбранный период</div>
                 <button class="btn btn-primary" onclick="showReportSettings('sales')">Сформировать</button>
             </div>
-            
+
             <div class="report-card">
                 <div class="report-icon">🚜</div>
                 <div class="report-title">Отчет по технике</div>
                 <div class="report-description">Анализ наличия и движения техники</div>
                 <button class="btn btn-primary" onclick="showReportSettings('vehicles')">Сформировать</button>
-            </div>
-            
+                </div>
+
             <div class="report-card">
                 <div class="report-icon">👥</div>
                 <div class="report-title">Отчет по клиентам</div>
                 <div class="report-description">Анализ клиентской базы и активности</div>
                 <button class="btn btn-primary" onclick="showReportSettings('customers')">Сформировать</button>
             </div>
-            
+
             <div class="report-card">
                 <div class="report-icon">📊</div>
                 <div class="report-title">Финансовый отчет</div>
@@ -381,19 +381,21 @@
                 <button class="btn btn-primary" onclick="showReportSettings('financial')">Сформировать</button>
             </div>
         </div>
-    </div>
+</div>
 
-    <script>
-        // Глобальная переменная для типа отчета
+<script>
+        // Глобальные переменные
         let currentReportType = '';
+        let saveDirHandle = null; // Дескриптор выбранной папки (File System Access API)
+        let reportSettingsTemplate = '';
 
         // Проверка авторизации
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login';
-                return;
-            }
+            return;
+        }
 
             // Устанавливаем текущую дату по умолчанию
             const today = new Date();
@@ -402,11 +404,18 @@
             document.getElementById('date-from').value = oneMonthAgo.toISOString().split('T')[0];
             document.getElementById('date-to').value = today.toISOString().split('T')[0];
 
+            // Сохраняем исходный шаблон настроек, чтобы можно было восстанавливать для нового отчёта
+            const reportSettings = document.getElementById('report-settings');
+            reportSettingsTemplate = reportSettings.innerHTML;
+
             // Обработчик формы отчета
-            document.getElementById('report-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                generateReport();
-            });
+            const form = document.getElementById('report-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    generateReport();
+                });
+            }
         });
 
         // Показать настройки отчета
@@ -427,31 +436,36 @@
 
         // Скрыть настройки отчета
         function hideReportSettings() {
-            document.getElementById('report-settings').style.display = 'none';
-            document.getElementById('report-form').reset();
+            const rs = document.getElementById('report-settings');
+            rs.style.display = 'none';
+            const form = document.getElementById('report-form');
+            if (form) form.reset();
         }
 
-        // Выбор пути сохранения
-        function selectSavePath() {
-            // В реальном приложении здесь был бы диалог выбора папки
-            // Для демонстрации используем prompt
-            const path = prompt('Введите путь для сохранения отчета:', '/Users/artemprohorov/Desktop/Reports');
-            if (path) {
-                document.getElementById('save-path').value = path;
+        // Выбор папки сохранения (используем File System Access API, если доступен)
+        async function selectSavePath() {
+            const input = document.getElementById('save-path');
+            if (window.showDirectoryPicker) {
+                try {
+                    saveDirHandle = await window.showDirectoryPicker();
+                    // Отображаем понятное имя, путь браузер не отдаёт по соображениям безопасности
+                    input.value = `Папка: ${saveDirHandle.name}`;
+                } catch (e) {
+                    // Пользователь отменил выбор
+                }
+            } else {
+                alert('Ваш браузер не поддерживает выбор папки. Файл будет скачан через стандартный диалог сохранения.');
+                input.value = 'Стандартная загрузка (скачивание)';
             }
         }
 
         // Генерация отчета
-        function generateReport() {
+        async function generateReport() {
             const dateFrom = document.getElementById('date-from').value;
             const dateTo = document.getElementById('date-to').value;
             const fileFormat = document.getElementById('file-format').value;
+            const reqFormat = fileFormat === 'excel' ? 'xlsx' : fileFormat; // нормализуем для бэкенда
             const savePath = document.getElementById('save-path').value;
-
-            if (!savePath) {
-                alert('Пожалуйста, выберите путь для сохранения отчета');
-                return;
-            }
 
             // Показываем прогресс
             const reportSettings = document.getElementById('report-settings');
@@ -463,14 +477,52 @@
                 </div>
             `;
 
-            // Создаем реальный Excel файл
-            setTimeout(() => {
-                createExcelReport(dateFrom, dateTo, fileFormat, savePath);
-            }, 1500);
+            try {
+                const url = `/api/reports/export?type=${encodeURIComponent(currentReportType)}&format=${encodeURIComponent(fileFormat)}&start_date=${encodeURIComponent(dateFrom)}&end_date=${encodeURIComponent(dateTo)}`;
+                const res = await fetch(url, { method: 'GET' });
+                if (!res.ok) throw new Error('export failed');
+                const blob = await res.blob();
+
+                // Используем выбранную папку, если есть поддержка; иначе — скачивание
+                const cd = res.headers.get('Content-Disposition') || '';
+                const match = cd.match(/filename=([^;]+)/);
+                const fallbackName = match ? match[1] : `report_${currentReportType}_${dateFrom}_${dateTo}.${fileFormat}`;
+
+                if (window.showDirectoryPicker && saveDirHandle && saveDirHandle.getFileHandle) {
+                    try {
+                        const fileHandle = await saveDirHandle.getFileHandle(fallbackName, { create: true });
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                    } catch (e) {
+                        triggerDownload(blob, fallbackName);
+                    }
+                } else {
+                    triggerDownload(blob, fallbackName);
+                }
+
+                // Показ результата
+                const reportSettings = document.getElementById('report-settings');
+                reportSettings.innerHTML = `
+                    <div style="text-align: center; padding: 2rem;">
+                        <div style=\"font-size: 3rem; margin-bottom: 1rem; color: #059669;\">✅</div>
+                        <h2 style=\"margin-bottom: 1rem; color: #1f2937;\">Отчет успешно сформирован!</h2>
+                        <p style=\"color: #6b7280; margin-bottom: 1rem;\">${saveDirHandle ? `Файл сохранен в: ${saveDirHandle.name}` : 'Файл скачан в папку загрузок'}</p>
+                        <p style=\"background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; font-family: monospace; word-break: break-all;\">${fallbackName}</p>
+                        <div style=\"margin-top: 2rem;\">
+                            <button onclick=\"hideReportSettings()\" style=\"padding: 0.75rem 1.5rem; background: #2563eb; color: white; border: none; border-radius: 0.5rem; cursor: pointer; margin-right: 1rem;\">Закрыть</button>
+                            <button onclick=\"generateAnotherReport()\" style=\"padding: 0.75rem 1.5rem; background: #059669; color: white; border: none; border-radius: 0.5rem; cursor: pointer;\">Создать еще один</button>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                alert('Ошибка формирования отчета');
+                showReportSettings(currentReportType);
+            }
         }
 
         // Создание реального Excel отчета
-        function createExcelReport(dateFrom, dateTo, fileFormat, savePath) {
+        async function createExcelReport(dateFrom, dateTo, fileFormat, savePath) {
             const reportNames = {
                 'sales': 'Отчет по продажам',
                 'vehicles': 'Отчет по технике',
@@ -478,28 +530,61 @@
                 'financial': 'Финансовый отчет'
             };
 
-            const fileName = `${reportNames[currentReportType]}_${dateFrom}_${dateTo}.${fileFormat === 'excel' ? 'xlsx' : fileFormat}`;
+            // Файлоформат: для варианта "Excel" сохраняем корректный CSV (который открывается в Excel)
+            const ext = fileFormat === 'excel' ? 'csv' : (fileFormat === 'pdf' ? 'pdf' : 'csv');
+            const mime = ext === 'csv' ? 'text/csv;charset=utf-8;' : 'application/pdf';
+            const fileName = `${reportNames[currentReportType]}_${dateFrom}_${dateTo}.${ext}`;
             
-            // Создаем CSV данные (простая версия Excel)
-            let csvContent = '';
-            
-            switch(currentReportType) {
-                case 'sales':
-                    csvContent = createSalesReportCSV();
-                    break;
-                case 'vehicles':
-                    csvContent = createVehiclesReportCSV();
-                    break;
-                case 'customers':
-                    csvContent = createCustomersReportCSV();
-                    break;
-                case 'financial':
-                    csvContent = createFinancialReportCSV();
-                    break;
+            // Запрашиваем у бэкенда готовый файл нужного формата
+            const resp = await fetch('/api/reports/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: currentReportType,
+                    format: fileFormat,
+                    date_from: dateFrom,
+                    date_to: dateTo
+                })
+            });
+
+            if (!resp.ok) {
+                alert('Ошибка формирования отчета');
+            return;
+        }
+
+            const blob = await resp.blob();
+
+            // Пытаемся сохранить в выбранную папку, если доступно
+            if (saveDirHandle && saveDirHandle.getFileHandle) {
+                try {
+                    const fileHandle = await saveDirHandle.getFileHandle(fileName, { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                } catch (e) {
+                    triggerDownload(blob, fileName);
+                }
+            } else {
+                triggerDownload(blob, fileName);
             }
 
-            // Создаем и скачиваем файл
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            // Показываем результат
+            const reportSettings = document.getElementById('report-settings');
+            reportSettings.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; color: #059669;">✅</div>
+                    <h2 style="margin-bottom: 1rem; color: #1f2937;">Отчет успешно сформирован!</h2>
+                    <p style="color: #6b7280; margin-bottom: 1rem;">${saveDirHandle ? `Файл сохранен в выбранной папке: ${saveDirHandle.name}` : 'Файл скачан в папку загрузок'}</p>
+                    <p style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; font-family: monospace; word-break: break-all;">${fileName}</p>
+                    <div style="margin-top: 2rem;">
+                        <button onclick="hideReportSettings()" style="padding: 0.75rem 1.5rem; background: #2563eb; color: white; border: none; border-radius: 0.5rem; cursor: pointer; margin-right: 1rem;">Закрыть</button>
+                        <button onclick="generateAnotherReport()" style="padding: 0.75rem 1.5rem; background: #059669; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Создать еще один</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function triggerDownload(blob, fileName) {
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
@@ -508,21 +593,6 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
-            // Показываем результат
-            const reportSettings = document.getElementById('report-settings');
-            reportSettings.innerHTML = `
-                <div style="text-align: center; padding: 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem; color: #059669;">✅</div>
-                    <h2 style="margin-bottom: 1rem; color: #1f2937;">Отчет успешно сформирован!</h2>
-                    <p style="color: #6b7280; margin-bottom: 1rem;">Файл "${fileName}" скачан в папку загрузок</p>
-                    <p style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; font-family: monospace; word-break: break-all;">${savePath}/${fileName}</p>
-                    <div style="margin-top: 2rem;">
-                        <button onclick="hideReportSettings()" style="padding: 0.75rem 1.5rem; background: #2563eb; color: white; border: none; border-radius: 0.5rem; cursor: pointer; margin-right: 1rem;">Закрыть</button>
-                        <button onclick="generateAnotherReport()" style="padding: 0.75rem 1.5rem; background: #059669; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Создать еще один</button>
-                    </div>
-                </div>
-            `;
         }
 
         // Создание CSV отчета по продажам
@@ -568,7 +638,36 @@
 
         // Создать еще один отчет
         function generateAnotherReport() {
-            hideReportSettings();
+            // Восстанавливаем исходный шаблон настроек
+            const rs = document.getElementById('report-settings');
+            rs.innerHTML = reportSettingsTemplate;
+            rs.style.display = 'block';
+
+            // Сброс выбора папки
+            saveDirHandle = null;
+            const input = document.getElementById('save-path');
+            if (input) input.value = '';
+
+            // Повторно навешиваем обработчик submit
+            const form = document.getElementById('report-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    generateReport();
+                });
+            }
+
+            // Обновляем период по умолчанию
+            const today = new Date();
+            const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+            const fromEl = document.getElementById('date-from');
+            const toEl = document.getElementById('date-to');
+            if (fromEl && toEl) {
+                fromEl.value = oneMonthAgo.toISOString().split('T')[0];
+                toEl.value = today.toISOString().split('T')[0];
+            }
+
+            // Обновляем заголовок под текущий тип отчёта
             showReportSettings(currentReportType);
         }
 
@@ -578,10 +677,10 @@
         }
 
         // Выход из системы
-        function logout() {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-        }
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    }
 
         // Инициализация мобильного меню
         document.addEventListener('DOMContentLoaded', function() {
