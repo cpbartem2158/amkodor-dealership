@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Избранное - Амкодор</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <style>
+        /* Стиль для кнопки "Выйти" */
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        }
+
+        /* User Layout */
+        .user-layout {
+            display: flex;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+
+        .user-navbar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #1f2937;
+            color: white;
+            width: 250px;
+            min-height: calc(100vh - 80px);
+            position: fixed;
+            left: -250px;
+            top: 80px;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: #3b82f6;
+        }
+
+        .menu-icon {
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+        }
+
+        .user-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            margin-top: 80px;
+        }
+
+        .user-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        /* Favorites Grid */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .favorite-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .favorite-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .favorite-image {
+            width: 100%;
+            height: 200px;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #9ca3af;
+        }
+
+        .favorite-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .favorite-info {
+            padding: 1.5rem;
+        }
+
+        .favorite-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .favorite-category {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .favorite-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .spec-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .spec-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .spec-value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .favorite-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 1rem;
+        }
+
+        .favorite-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-description {
+            margin-bottom: 2rem;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Mobile Sidebar */
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            transition: left 0.3s ease;
+        }
+
+        .mobile-sidebar.open {
+            left: 0;
+        }
+
+        .mobile-sidebar-content {
+            background: #1f2937;
+            width: 280px;
+            height: 100%;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .mobile-sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .mobile-sidebar-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 1rem;
+        }
+
+        .mobile-nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+            
+            .user-content.sidebar-open {
+                margin-left: 0;
+            }
+
+            .favorites-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="user-layout">
+        <!-- Navbar -->
+        <nav class="user-navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <div class="logo">АМКОДОР - Избранное</div>
+            </div>
+            <div class="navbar-right">
+                <div class="user-info">
+                    <span id="user-name">Пользователь</span>
+                    <button class="btn-logout" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Mobile Sidebar -->
+        <div class="mobile-sidebar" id="mobileSidebar">
+            <div class="mobile-sidebar-content">
+                <div class="mobile-sidebar-header">
+                    <div class="mobile-sidebar-title">АМКОДОР</div>
+                    <button class="mobile-sidebar-close" id="mobileSidebarClose">×</button>
+                </div>
+                <ul class="mobile-nav-links">
+                    <li><a href="/">🏠 Главная</a></li>
+                    <li><a href="/catalog">🚜 Каталог</a></li>
+                    <li><a href="/orders">📋 Мои заказы</a></li>
+                    <li><a href="/favorites">❤️ Избранное</a></li>
+                    <li><a href="/service">🔧 Сервис</a></li>
+                    <li><a href="/profile">⚙️ Профиль</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-menu">
+                <a href="/" class="menu-item">
+                    <span class="menu-icon">🏠</span>
+                    <span class="menu-text">Главная</span>
+                </a>
+                <a href="/catalog" class="menu-item">
+                    <span class="menu-icon">🚜</span>
+                    <span class="menu-text">Каталог</span>
+                </a>
+                <a href="/orders" class="menu-item">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">Мои заказы</span>
+                </a>
+                <a href="/favorites" class="menu-item active">
+                    <span class="menu-icon">❤️</span>
+                    <span class="menu-text">Избранное</span>
+                </a>
+                <a href="/service" class="menu-item">
+                    <span class="menu-icon">🔧</span>
+                    <span class="menu-text">Сервис</span>
+                </a>
+                <a href="/profile" class="menu-item">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Профиль</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="user-content" id="userContent">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Избранное</h1>
+                <p class="page-description">Техника, которую вы сохранили для быстрого доступа</p>
+            </div>
+
+            <!-- Favorites Grid -->
+            <div class="favorites-grid" id="favoritesGrid">
+                <!-- Favorites will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let favorites = [];
+
+        // Проверка авторизации
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const userName = localStorage.getItem('userName');
+            
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Отображаем имя пользователя
+            if (userName) {
+                document.getElementById('user-name').textContent = userName;
+            }
+
+            // Загружаем избранное
+            loadFavorites();
+        });
+
+        // Mobile menu toggle
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const userContent = document.getElementById('userContent');
+            
+            if (sidebar && userContent) {
+                sidebar.classList.toggle('open');
+                userContent.classList.toggle('sidebar-open');
+            }
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            const userContent = document.getElementById('userContent');
+            
+            if (sidebar && menuToggle && userContent) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('open');
+                    userContent.classList.remove('sidebar-open');
+                }
+            }
+        });
+
+        // Auto-close sidebar when clicking menu items
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const sidebar = document.getElementById('sidebar');
+            const userContent = document.getElementById('userContent');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (sidebar && userContent) {
+                        sidebar.classList.remove('open');
+                        userContent.classList.remove('sidebar-open');
+                    }
+                });
+            });
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('open');
+                document.getElementById('userContent').classList.remove('sidebar-open');
+            }
+        });
+
+        // Auto-close sidebar when clicking menu items
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                userContent.classList.remove('sidebar-open');
+            });
+        });
+
+        // Загрузка избранного
+        async function loadFavorites() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/user/favorites', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        favorites = data.data;
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки избранного:', error);
+            }
+
+            // Заглушка для демонстрации
+            if (favorites.length === 0) {
+                favorites = [
+                    {
+                        id: 1,
+                        name: "Экскаватор АМКОДОР 3316",
+                        category: "Экскаваторы",
+                        price: 150000,
+                        year: 2023,
+                        engine: "Дизель",
+                        power: "160 л.с.",
+                        weight: "16 т",
+                        image: "🚜"
+                    },
+                    {
+                        id: 2,
+                        name: "Бульдозер АМКОДОР 3317",
+                        category: "Бульдозеры",
+                        price: 200000,
+                        year: 2023,
+                        engine: "Дизель",
+                        power: "180 л.с.",
+                        weight: "17 т",
+                        image: "🚜"
+                    }
+                ];
+            }
+
+            displayFavorites();
+        }
+
+        // Отображение избранного
+        function displayFavorites() {
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            
+            if (favorites.length === 0) {
+                favoritesGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❤️</div>
+                        <h3 class="empty-title">Избранное пусто</h3>
+                        <p class="empty-description">Добавьте технику в избранное из каталога</p>
+                        <a href="/catalog" class="btn-primary">Перейти в каталог</a>
+                    </div>
+                `;
+                return;
+            }
+
+            favoritesGrid.innerHTML = favorites.map(favorite => `
+                <div class="favorite-card">
+                    <div class="favorite-image">
+                        ${favorite.image ? `<img src="${favorite.image}" alt="${favorite.name}">` : '🚜'}
+                    </div>
+                    <div class="favorite-info">
+                        <h3 class="favorite-name">${favorite.name}</h3>
+                        <p class="favorite-category">${favorite.category}</p>
+                        <div class="favorite-specs">
+                            <div class="spec-item">
+                                <span class="spec-label">Год</span>
+                                <span class="spec-value">${favorite.year}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Двигатель</span>
+                                <span class="spec-value">${favorite.engine}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Мощность</span>
+                                <span class="spec-value">${favorite.power}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Вес</span>
+                                <span class="spec-value">${favorite.weight}</span>
+                            </div>
+                        </div>
+                        <div class="favorite-price">${favorite.price.toLocaleString()} ₽</div>
+                        <div class="favorite-actions">
+                            <button class="btn-primary" onclick="viewVehicle(${favorite.id})">Подробнее</button>
+                            <button class="btn-danger" onclick="removeFromFavorites(${favorite.id})">Удалить</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Просмотр техники
+        function viewVehicle(id) {
+            const favorite = favorites.find(f => f.id === id);
+            if (favorite) {
+                alert(`Подробная информация о ${favorite.name}\nЦена: ${favorite.price.toLocaleString()} ₽\nГод: ${favorite.year}\nДвигатель: ${favorite.engine}\nМощность: ${favorite.power}\nВес: ${favorite.weight}`);
+            }
+        }
+
+        // Удаление из избранного
+        function removeFromFavorites(id) {
+            if (confirm('Удалить эту технику из избранного?')) {
+                favorites = favorites.filter(f => f.id !== id);
+                displayFavorites();
+                alert('Техника удалена из избранного');
+            }
+        }
+
+        // Выход из системы
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

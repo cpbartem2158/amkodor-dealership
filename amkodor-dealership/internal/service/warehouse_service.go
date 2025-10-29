@@ -6,10 +6,10 @@ import (
 )
 
 type WarehouseService struct {
-	repo *repository.WarehouseRepository
+	repo repository.WarehouseRepository
 }
 
-func NewWarehouseService(repo *repository.WarehouseRepository) *WarehouseService {
+func NewWarehouseService(repo repository.WarehouseRepository) *WarehouseService {
 	return &WarehouseService{repo: repo}
 }
 
@@ -21,14 +21,14 @@ func (s *WarehouseService) GetByID(id int) (*models.Warehouse, error) {
 	return s.repo.GetByID(id)
 }
 
-func (s *WarehouseService) Create(w *models.Warehouse) (int, error) {
-	return s.repo.Create(w)
+func (s *WarehouseService) Create(warehouse *models.Warehouse) (int, error) {
+	return s.repo.Create(warehouse)
 }
 
-func (s *WarehouseService) Update(w *models.Warehouse) error {
-	return s.repo.Update(w)
+func (s *WarehouseService) Update(warehouse *models.Warehouse) error {
+	return s.repo.Update(warehouse)
 }
 
-func (s *WarehouseService) GetStatistics(id int) (*models.Warehouse, error) {
-	return s.repo.GetStatistics(id)
+func (s *WarehouseService) Delete(id int) error {
+	return s.repo.Delete(id)
 }

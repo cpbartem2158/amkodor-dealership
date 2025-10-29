@@ -11,8 +11,8 @@ type ServiceRepository struct {
 	db *sql.DB
 }
 
-func NewServiceRepository(db *sql.DB) *ServiceRepository {
-	return &ServiceRepository{db: db}
+func NewServiceRepository(db *sql.DB) ServiceRepository {
+	return ServiceRepository{db: db}
 }
 
 // GetAllOrders возвращает все сервисные заказы
@@ -44,6 +44,89 @@ func (r *ServiceRepository) GetAllOrders(limit, offset int) ([]models.ServiceOrd
 	}
 
 	return orders, nil
+}
+
+// GetByID возвращает сервисный заказ по ID
+func (r *ServiceRepository) GetByID(id int) (*models.ServiceOrder, error) {
+	query := `
+		SELECT * FROM vw_service_orders_full_info
+		WHERE order_id = $1
+	`
+
+	var order models.ServiceOrder
+	err := r.db.QueryRow(query, id).Scan(
+		&order.ServiceOrderID, &order.VehicleID, &order.CustomerID, &order.EmployeeID,
+		&order.OrderDate, &order.ServiceType, &order.Description, &order.Status,
+		&order.Cost, &order.CompletionDate, &order.CreatedAt,
+		&order.VIN, &order.ModelName, &order.ClientName, &order.ClientPhone,
+		&order.MasterName, &order.PartsCost,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("service order not found")
+		}
+		return nil, fmt.Errorf("error querying service order: %w", err)
+	}
+
+	return &order, nil
+}
+
+// Create создает новый сервисный заказ
+func (r *ServiceRepository) Create(order *models.ServiceOrder) (int, error) {
+	query := `
+		INSERT INTO service_orders (vehicle_id, customer_id, employee_id, order_date, 
+			service_type, description, status, total_cost)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING order_id
+	`
+
+	var orderID int
+	err := r.db.QueryRow(query,
+		order.VehicleID, order.CustomerID, order.EmployeeID, order.OrderDate,
+		order.ServiceType, order.Description, order.Status, order.Cost,
+	).Scan(&orderID)
+
+	if err != nil {
+		return 0, fmt.Errorf("error creating service order: %w", err)
+	}
+
+	return orderID, nil
+}
+
+// Update обновляет сервисный заказ
+func (r *ServiceRepository) Update(order *models.ServiceOrder) error {
+	query := `
+		UPDATE service_orders 
+		SET vehicle_id = $1, customer_id = $2, employee_id = $3, order_date = $4,
+			service_type = $5, description = $6, status = $7, total_cost = $8,
+			completion_date = $9, updated_at = CURRENT_TIMESTAMP
+		WHERE order_id = $10
+	`
+
+	_, err := r.db.Exec(query,
+		order.VehicleID, order.CustomerID, order.EmployeeID, order.OrderDate,
+		order.ServiceType, order.Description, order.Status, order.Cost,
+		order.CompletionDate, order.ServiceOrderID,
+	)
+
+	if err != nil {
+		return fmt.Errorf("error updating service order: %w", err)
+	}
+
+	return nil
+}
+
+// Delete удаляет сервисный заказ
+func (r *ServiceRepository) Delete(id int) error {
+	query := `DELETE FROM service_orders WHERE order_id = $1`
+
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("error deleting service order: %w", err)
+	}
+
+	return nil
 }
 
 // GetOrderByID возвращает сервисный заказ по ID

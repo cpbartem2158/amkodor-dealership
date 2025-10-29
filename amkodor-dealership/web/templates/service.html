@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервисное обслуживание - Амкодор</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <style>
+        /* Стиль для кнопки "Выйти" */
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        }
+
+        /* User Layout */
+        .user-layout {
+            display: flex;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+
+        .user-navbar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #1f2937;
+            color: white;
+            width: 250px;
+            min-height: calc(100vh - 80px);
+            position: fixed;
+            left: -250px;
+            top: 80px;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: #3b82f6;
+        }
+
+        .menu-icon {
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+        }
+
+        .user-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            margin-top: 80px;
+        }
+
+        .user-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        /* Service Cards */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .service-description {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .service-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Service Requests */
+        .requests-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        .requests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .request-card {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .request-info {
+            flex: 1;
+        }
+
+        .request-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .request-date {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .request-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .request-description {
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Mobile Sidebar */
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            transition: left 0.3s ease;
+        }
+
+        .mobile-sidebar.open {
+            left: 0;
+        }
+
+        .mobile-sidebar-content {
+            background: #1f2937;
+            width: 280px;
+            height: 100%;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .mobile-sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .mobile-sidebar-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 1rem;
+        }
+
+        .mobile-nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+            
+            .user-content.sidebar-open {
+                margin-left: 0;
+            }
+
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="user-layout">
+        <!-- Navbar -->
+        <nav class="user-navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <div class="logo">АМКОДОР - Сервис</div>
+            </div>
+            <div class="navbar-right">
+                <div class="user-info">
+                    <span id="user-name">Пользователь</span>
+                    <button class="btn-logout" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Mobile Sidebar -->
+        <div class="mobile-sidebar" id="mobileSidebar">
+            <div class="mobile-sidebar-content">
+                <div class="mobile-sidebar-header">
+                    <div class="mobile-sidebar-title">АМКОДОР</div>
+                    <button class="mobile-sidebar-close" id="mobileSidebarClose">×</button>
+                </div>
+                <ul class="mobile-nav-links">
+                    <li><a href="/">🏠 Главная</a></li>
+                    <li><a href="/catalog">🚜 Каталог</a></li>
+                    <li><a href="/orders">📋 Мои заказы</a></li>
+                    <li><a href="/favorites">❤️ Избранное</a></li>
+                    <li><a href="/service">🔧 Сервис</a></li>
+                    <li><a href="/profile">⚙️ Профиль</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-menu">
+                <a href="/" class="menu-item">
+                    <span class="menu-icon">🏠</span>
+                    <span class="menu-text">Главная</span>
+                </a>
+                <a href="/catalog" class="menu-item">
+                    <span class="menu-icon">🚜</span>
+                    <span class="menu-text">Каталог</span>
+                </a>
+                <a href="/orders" class="menu-item">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">Мои заказы</span>
+                </a>
+                <a href="/favorites" class="menu-item">
+                    <span class="menu-icon">❤️</span>
+                    <span class="menu-text">Избранное</span>
+                </a>
+                <a href="/service" class="menu-item active">
+                    <span class="menu-icon">🔧</span>
+                    <span class="menu-text">Сервис</span>
+                </a>
+                <a href="/profile" class="menu-item">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Профиль</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="user-content" id="userContent">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Сервисное обслуживание</h1>
+                <p class="page-description">Профессиональный сервис и техническая поддержка для вашей техники</p>
+            </div>
+
+            <!-- Service Cards -->
+            <div class="service-grid">
+                <div class="service-card">
+                    <div class="service-icon">🔧</div>
+                    <h3 class="service-title">Техническое обслуживание</h3>
+                    <p class="service-description">Регулярное техническое обслуживание для поддержания техники в отличном состоянии</p>
+                    <div class="service-price">от 15 000 ₽</div>
+                    <div class="service-actions">
+                        <button class="btn-primary" onclick="requestService('maintenance')">Заказать</button>
+                        <button class="btn-secondary" onclick="viewDetails('maintenance')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">🔨</div>
+                    <h3 class="service-title">Ремонт и диагностика</h3>
+                    <p class="service-description">Диагностика неисправностей и качественный ремонт любой сложности</p>
+                    <div class="service-price">от 25 000 ₽</div>
+                    <div class="service-actions">
+                        <button class="btn-primary" onclick="requestService('repair')">Заказать</button>
+                        <button class="btn-secondary" onclick="viewDetails('repair')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">🛠️</div>
+                    <h3 class="service-title">Замена запчастей</h3>
+                    <p class="service-description">Замена изношенных деталей оригинальными запчастями</p>
+                    <div class="service-price">от 10 000 ₽</div>
+                    <div class="service-actions">
+                        <button class="btn-primary" onclick="requestService('parts')">Заказать</button>
+                        <button class="btn-secondary" onclick="viewDetails('parts')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">🚚</div>
+                    <h3 class="service-title">Выездной сервис</h3>
+                    <p class="service-description">Сервисное обслуживание на вашем объекте</p>
+                    <div class="service-price">от 30 000 ₽</div>
+                    <div class="service-actions">
+                        <button class="btn-primary" onclick="requestService('mobile')">Заказать</button>
+                        <button class="btn-secondary" onclick="viewDetails('mobile')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">📋</div>
+                    <h3 class="service-title">Консультации</h3>
+                    <p class="service-description">Технические консультации и рекомендации по эксплуатации</p>
+                    <div class="service-price">от 5 000 ₽</div>
+                    <div class="service-actions">
+                        <button class="btn-primary" onclick="requestService('consultation')">Заказать</button>
+                        <button class="btn-secondary" onclick="viewDetails('consultation')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">⚡</div>
+                    <h3 class="service-title">Экстренный ремонт</h3>
+                    <p class="service-description">Срочный ремонт для восстановления работоспособности</p>
+                    <div class="service-price">от 50 000 ₽</div>
+                    <div class="service-actions">
+                        <button class="btn-primary" onclick="requestService('emergency')">Заказать</button>
+                        <button class="btn-secondary" onclick="viewDetails('emergency')">Подробнее</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Requests -->
+            <div class="requests-section">
+                <h2 class="section-title">Мои заявки на сервис</h2>
+                <div class="requests-list" id="requestsList">
+                    <!-- Requests will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let serviceRequests = [];
+
+        // Проверка авторизации
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const userName = localStorage.getItem('userName');
+            
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Отображаем имя пользователя
+            if (userName) {
+                document.getElementById('user-name').textContent = userName;
+            }
+
+            // Загружаем заявки
+            loadServiceRequests();
+        });
+
+        // Mobile menu toggle
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const userContent = document.getElementById('userContent');
+            
+            if (sidebar && userContent) {
+                sidebar.classList.toggle('open');
+                userContent.classList.toggle('sidebar-open');
+            }
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            const userContent = document.getElementById('userContent');
+            
+            if (sidebar && menuToggle && userContent) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('open');
+                    userContent.classList.remove('sidebar-open');
+                }
+            }
+        });
+
+        // Auto-close sidebar when clicking menu items
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const sidebar = document.getElementById('sidebar');
+            const userContent = document.getElementById('userContent');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (sidebar && userContent) {
+                        sidebar.classList.remove('open');
+                        userContent.classList.remove('sidebar-open');
+                    }
+                });
+            });
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('open');
+                document.getElementById('userContent').classList.remove('sidebar-open');
+            }
+        });
+
+        // Auto-close sidebar when clicking menu items
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                userContent.classList.remove('sidebar-open');
+            });
+        });
+
+        // Загрузка заявок на сервис
+        async function loadServiceRequests() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/user/service-requests', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        serviceRequests = data.data;
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки заявок:', error);
+            }
+
+            // Заглушка для демонстрации
+            if (serviceRequests.length === 0) {
+                serviceRequests = [
+                    {
+                        id: 1,
+                        title: 'Техническое обслуживание экскаватора',
+                        description: 'Плановое ТО экскаватора АМКОДОР 3316',
+                        date: '2024-01-15',
+                        status: 'pending'
+                    },
+                    {
+                        id: 2,
+                        title: 'Ремонт гидравлики',
+                        description: 'Замена гидроцилиндра подъема стрелы',
+                        date: '2024-01-10',
+                        status: 'in-progress'
+                    }
+                ];
+            }
+
+            displayServiceRequests();
+        }
+
+        // Отображение заявок на сервис
+        function displayServiceRequests() {
+            const requestsList = document.getElementById('requestsList');
+            
+            if (serviceRequests.length === 0) {
+                requestsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">У вас пока нет заявок на сервис</div>';
+                return;
+            }
+
+            requestsList.innerHTML = serviceRequests.map(request => `
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-info">
+                            <div class="request-title">${request.title}</div>
+                            <div class="request-date">${new Date(request.date).toLocaleDateString('ru-RU')}</div>
+                        </div>
+                        <div class="request-status status-${request.status}">
+                            ${getStatusText(request.status)}
+                        </div>
+                    </div>
+                    <div class="request-description">${request.description}</div>
+                    <div class="request-actions">
+                        <button class="btn-primary" onclick="viewRequest(${request.id})">Подробнее</button>
+                        ${request.status === 'pending' ? '<button class="btn-secondary" onclick="cancelRequest(' + request.id + ')">Отменить</button>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Получение текста статуса
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Ожидает',
+                'in-progress': 'В работе',
+                'completed': 'Завершено'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Заказ сервиса
+        function requestService(type) {
+            const serviceTypes = {
+                'maintenance': 'Техническое обслуживание',
+                'repair': 'Ремонт и диагностика',
+                'parts': 'Замена запчастей',
+                'mobile': 'Выездной сервис',
+                'consultation': 'Консультации',
+                'emergency': 'Экстренный ремонт'
+            };
+
+            const serviceName = serviceTypes[type];
+            
+            // Получаем описание от пользователя
+            const description = prompt(`Опишите детали заявки на "${serviceName}":`, '');
+            
+            if (description && description.trim()) {
+                createServiceRequest(serviceName, description.trim());
+            }
+        }
+
+        // Создание заявки на сервис
+        async function createServiceRequest(title, description) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/user/service-requests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        description: description,
+                        service_type: title
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        alert(`Заявка на "${title}" создана! Номер заявки: #${data.data.id}. Наш менеджер свяжется с вами в ближайшее время.`);
+                        loadServiceRequests(); // Обновляем список заявок
+                    } else {
+                        alert('Ошибка при создании заявки');
+                    }
+                } else {
+                    alert('Ошибка при создании заявки');
+                }
+            } catch (error) {
+                console.error('Error creating service request:', error);
+                alert('Ошибка при создании заявки');
+            }
+        }
+
+        // Просмотр деталей
+        function viewDetails(type) {
+            const details = {
+                'maintenance': 'Включает: проверку всех систем, замену фильтров, смазку, диагностику',
+                'repair': 'Включает: диагностику, ремонт, замену деталей, тестирование',
+                'parts': 'Включает: подбор запчастей, замену, тестирование',
+                'mobile': 'Включает: выезд специалиста, диагностику, ремонт на месте',
+                'consultation': 'Включает: осмотр техники, рекомендации, план обслуживания',
+                'emergency': 'Включает: срочный выезд, диагностику, ремонт в кратчайшие сроки'
+            };
+
+            alert(details[type] || 'Подробная информация будет предоставлена при заказе услуги.');
+        }
+
+        // Просмотр заявки
+        function viewRequest(id) {
+            const request = serviceRequests.find(r => r.id === id);
+            if (request) {
+                alert(`Заявка: ${request.title}\nОписание: ${request.description}\nДата: ${new Date(request.date).toLocaleDateString('ru-RU')}\nСтатус: ${getStatusText(request.status)}`);
+            }
+        }
+
+        // Отмена заявки
+        function cancelRequest(id) {
+            if (confirm('Вы уверены, что хотите отменить эту заявку?')) {
+                const request = serviceRequests.find(r => r.id === id);
+                if (request) {
+                    serviceRequests = serviceRequests.filter(r => r.id !== id);
+                    displayServiceRequests();
+                    alert('Заявка отменена');
+                }
+            }
+        }
+
+        // Выход из системы
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

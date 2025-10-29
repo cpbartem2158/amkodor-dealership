@@ -4,298 +4,719 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Сотрудники - Амкодор</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="/static/css/admin.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+        }
+
+        /* Admin Layout Styles */
+        .admin-layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .admin-navbar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .admin-logo {
+            color: white;
+            text-decoration: none;
+        }
+
+        .admin-logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar {
+            background: #1f2937;
+            color: white;
+            width: 250px;
+            min-height: calc(100vh - 80px);
+            position: fixed;
+            left: -250px;
+            top: 80px;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: #d1d5db;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #374151;
+            color: white;
+        }
+
+        .menu-item.active {
+            background: #1d4ed8;
+            color: white;
+            border-left-color: #60a5fa;
+        }
+
+        .menu-icon {
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .admin-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+            
+            .admin-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .employee-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Стиль для кнопки "Выйти" */
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: white !important;
+            border: none !important;
+            padding: 0.75rem 1.5rem !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.875rem !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2) !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+            text-align: center !important;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3) !important;
+        }
+
+        .btn-logout:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2) !important;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #1f2937;
+        }
+
+        .employees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .employee-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .employee-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .employee-position {
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .employee-info {
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .employee-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding: 1rem 0 0;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn {
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+    </style>
 </head>
 <body>
-<div class="admin-container">
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2>АМКОДОР</h2>
-            <p>Автосалон</p>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="/admin/dashboard" class="nav-item">
-                <span class="icon">📊</span>
-                Дашборд
-            </a>
-            <a href="/admin/vehicles" class="nav-item">
-                <span class="icon">🚜</span>
-                Техника
-            </a>
-            <a href="/admin/sales" class="nav-item">
-                <span class="icon">💰</span>
-                Продажи
-            </a>
-            <a href="/admin/customers" class="nav-item">
-                <span class="icon">👥</span>
-                Клиенты
-            </a>
-            <a href="/admin/employees" class="nav-item active">
-                <span class="icon">👔</span>
-                Сотрудники
-            </a>
-            <a href="/admin/service" class="nav-item">
-                <span class="icon">🔧</span>
-                Сервис
-            </a>
-            <a href="/admin/reports" class="nav-item">
-                <span class="icon">📈</span>
-                Отчеты
-            </a>
+    <div class="admin-layout">
+        <!-- Navigation -->
+        <nav class="admin-navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <a href="/admin/dashboard" class="admin-logo">
+                    <h1>АМКОДОР</h1>
+                </a>
+            </div>
+
+            <div class="navbar-right">
+                <div class="user-info">
+                    <span>Администратор</span>
+                    <button class="btn-logout" onclick="logout()">Выйти</button>
+                </div>
+            </div>
         </nav>
-        <div class="sidebar-footer">
-            <button onclick="logout()" class="btn-logout">Выход</button>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-menu">
+                <a href="/admin/dashboard" class="menu-item">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Главная</span>
+                </a>
+                <a href="/admin/vehicles" class="menu-item">
+                    <span class="menu-icon">🚜</span>
+                    <span class="menu-text">Техника</span>
+                </a>
+                <a href="/admin/sales" class="menu-item">
+                    <span class="menu-icon">💰</span>
+                    <span class="menu-text">Продажи</span>
+                </a>
+                <a href="/admin/customers" class="menu-item">
+                    <span class="menu-icon">👥</span>
+                    <span class="menu-text">Клиенты</span>
+                </a>
+                <a href="/admin/employees" class="menu-item active">
+                    <span class="menu-icon">👔</span>
+                    <span class="menu-text">Сотрудники</span>
+                </a>
+                <a href="/admin/warehouses" class="menu-item">
+                    <span class="menu-icon">🏢</span>
+                    <span class="menu-text">Склады</span>
+                </a>
+                <a href="/admin/service" class="menu-item">
+                    <span class="menu-icon">🔧</span>
+                    <span class="menu-text">Сервис</span>
+                </a>
+                <a href="/admin/reports" class="menu-item">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Отчёты</span>
+                </a>
+                <a href="/admin/settings" class="menu-item">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Настройки</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1 class="page-title">Управление сотрудниками</h1>
+            <button class="btn btn-primary" onclick="showAddEmployeeForm()" style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+                ➕ Добавить сотрудника
+            </button>
         </div>
-    </aside>
-
-    <main class="main-content">
-        <header class="main-header">
-            <h1>Сотрудники</h1>
-            <button onclick="openCreateModal()" class="btn btn-primary">+ Добавить сотрудника</button>
-        </header>
-
-        <section class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ФИО</th>
-                    <th>Должность</th>
-                    <th>Филиал</th>
-                    <th>Email</th>
-                    <th>Телефон</th>
-                    <th>Зарплата</th>
-                    <th>Стаж</th>
-                    <th>Статус</th>
-                    <th>Действия</th>
-                </tr>
-                </thead>
-                <tbody id="employeesTable">
-                <tr>
-                    <td colspan="10" style="text-align: center;">Загрузка...</td>
-                </tr>
-                </tbody>
-            </table>
-        </section>
-    </main>
-</div>
-
-<div id="employeeModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="modalTitle">Новый сотрудник</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
+        
+        <!-- Форма добавления сотрудника -->
+        <div id="add-employee-form" style="display: none; background: white; border-radius: 1rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 1.5rem; color: #1f2937;">Добавить нового сотрудника</h2>
+            <form id="employee-form">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">ФИО</label>
+                        <input type="text" id="employee-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Должность</label>
+                        <select id="employee-position" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                            <option value="">Выберите должность</option>
+                            <option value="Менеджер по продажам">Менеджер по продажам</option>
+                            <option value="Сервисный инженер">Сервисный инженер</option>
+                            <option value="Менеджер по работе с клиентами">Менеджер по работе с клиентами</option>
+                            <option value="Технический специалист">Технический специалист</option>
+                            <option value="Администратор">Администратор</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Email</label>
+                        <input type="email" id="employee-email" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Телефон</label>
+                        <input type="tel" id="employee-phone" required placeholder="+375 29 123-45-67" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Дата приема на работу</label>
+                        <input type="date" id="employee-hire-date" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Зарплата (BYN)</label>
+                        <input type="number" id="employee-salary" required min="0" placeholder="1500" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Статус</label>
+                        <select id="employee-status" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                            <option value="Работает">Работает</option>
+                            <option value="Уволен">Уволен</option>
+                            <option value="В отпуске">В отпуске</option>
+                            <option value="На больничном">На больничном</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" onclick="hideAddEmployeeForm()" style="padding: 0.75rem 1.5rem; border: 1px solid #d1d5db; background: white; border-radius: 0.5rem; cursor: pointer;">Отмена</button>
+                    <button type="submit" style="padding: 0.75rem 1.5rem; background: #059669; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600;">Добавить сотрудника</button>
+                </div>
+            </form>
         </div>
-        <form id="employeeForm" onsubmit="saveEmployee(event)">
-            <div class="form-group">
-                <label class="form-label">Фамилия *</label>
-                <input type="text" id="lastName" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Имя *</label>
-                <input type="text" id="firstName" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Отчество</label>
-                <input type="text" id="middleName" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Email *</label>
-                <input type="email" id="email" class="form-control" required>
-            </div>
-            <div class="form-group" id="passwordField">
-                <label class="form-label">Пароль *</label>
-                <input type="password" id="password" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Телефон</label>
-                <input type="tel" id="phone" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Должность *</label>
-                <select id="positionId" class="form-control" required>
-                    <option value="">Выберите должность</option>
-                    <option value="1">Менеджер по продажам</option>
-                    <option value="2">Старший менеджер</option>
-                    <option value="3">Механик</option>
-                    <option value="4">Мастер сервиса</option>
-                    <option value="8">Администратор</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Филиал</label>
-                <select id="warehouseId" class="form-control">
-                    <option value="">Не указан</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Зарплата</label>
-                <input type="number" step="0.01" id="salary" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="form-label">
-                    <input type="checkbox" id="isActive" checked> Активен
-                </label>
-            </div>
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-        </form>
+        
+        <!-- Форма редактирования сотрудника -->
+        <div id="edit-employee-form" style="display: none; background: white; border-radius: 1rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 1.5rem; color: #1f2937;">Редактировать сотрудника</h2>
+            <form id="edit-employee-form-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">ФИО</label>
+                        <input type="text" id="edit-employee-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Должность</label>
+                        <select id="edit-employee-position" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                            <option value="">Выберите должность</option>
+                            <option value="Менеджер по продажам">Менеджер по продажам</option>
+                            <option value="Сервисный инженер">Сервисный инженер</option>
+                            <option value="Менеджер по работе с клиентами">Менеджер по работе с клиентами</option>
+                            <option value="Технический специалист">Технический специалист</option>
+                            <option value="Администратор">Администратор</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Email</label>
+                        <input type="email" id="edit-employee-email" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Телефон</label>
+                        <input type="tel" id="edit-employee-phone" required placeholder="+375 29 123-45-67" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Дата приема на работу</label>
+                        <input type="date" id="edit-employee-hire-date" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Зарплата (BYN)</label>
+                        <input type="number" id="edit-employee-salary" required min="0" placeholder="1500" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Статус</label>
+                        <select id="edit-employee-status" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                            <option value="Работает">Работает</option>
+                            <option value="Уволен">Уволен</option>
+                            <option value="В отпуске">В отпуске</option>
+                            <option value="На больничном">На больничном</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" onclick="hideEditEmployeeForm()" style="padding: 0.75rem 1.5rem; border: 1px solid #d1d5db; background: white; border-radius: 0.5rem; cursor: pointer;">Отмена</button>
+                    <button type="submit" style="padding: 0.75rem 1.5rem; background: #059669; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600;">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="employees-grid" id="employees-grid">
+            <!-- Сотрудники будут загружены здесь -->
+        </div>
     </div>
-</div>
 
-<script src="/static/js/api.js"></script>
-<script>
-    let currentEmployeeId = null;
+    <script>
+        // Глобальная переменная для хранения сотрудников
+        let employees = [];
 
-    async function loadEmployees() {
-        try {
-            const employees = await API.employees.getAll({ limit: 100 });
-            displayEmployees(employees);
-        } catch (error) {
-            console.error('Error loading employees:', error);
-            alert('Ошибка загрузки данных');
-        }
-    }
-
-    async function loadWarehouses() {
-        try {
-            const warehouses = await API.warehouses.getAll();
-            const select = document.getElementById('warehouseId');
-            select.innerHTML = '<option value="">Не указан</option>' +
-                warehouses.map(w => `<option value="${w.warehouse_id}">${w.warehouse_name}</option>`).join('');
-        } catch (error) {
-            console.error('Error loading warehouses:', error);
-        }
-    }
-
-    function displayEmployees(employees) {
-        const tbody = document.getElementById('employeesTable');
-
-        if (!employees || employees.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Нет данных</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = employees.map(e => `
-                <tr>
-                    <td>${e.employee_id}</td>
-                    <td>${e.full_name || `${e.last_name} ${e.first_name}`}</td>
-                    <td>${e.position_name || '-'}</td>
-                    <td>${e.warehouse_name || '-'}</td>
-                    <td>${e.email || '-'}</td>
-                    <td>${e.phone || '-'}</td>
-                    <td>${e.salary ? formatCurrency(e.salary) : '-'}</td>
-                    <td>${e.years_of_service || 0} лет</td>
-                    <td><span class="badge badge-${e.is_active ? 'success' : 'danger'}">${e.is_active ? 'Активен' : 'Неактивен'}</span></td>
-                    <td>
-                        <button onclick="editEmployee(${e.employee_id})" class="btn-icon">✏️</button>
-                        <button onclick="deleteEmployee(${e.employee_id})" class="btn-icon">🗑️</button>
-                    </td>
-                </tr>
-            `).join('');
-    }
-
-    function openCreateModal() {
-        currentEmployeeId = null;
-        document.getElementById('modalTitle').textContent = 'Новый сотрудник';
-        document.getElementById('employeeForm').reset();
-        document.getElementById('passwordField').style.display = 'block';
-        document.getElementById('password').required = true;
-        document.getElementById('employeeModal').classList.add('active');
-        loadWarehouses();
-    }
-
-    async function editEmployee(id) {
-        try {
-            const employee = await API.employees.getById(id);
-            currentEmployeeId = id;
-
-            document.getElementById('modalTitle').textContent = 'Редактировать сотрудника';
-            document.getElementById('firstName').value = employee.first_name;
-            document.getElementById('lastName').value = employee.last_name;
-            document.getElementById('middleName').value = employee.middle_name || '';
-            document.getElementById('email').value = employee.email || '';
-            document.getElementById('phone').value = employee.phone || '';
-            document.getElementById('positionId').value = employee.position_id;
-            document.getElementById('warehouseId').value = employee.warehouse_id || '';
-            document.getElementById('salary').value = employee.salary || '';
-            document.getElementById('isActive').checked = employee.is_active;
-
-            document.getElementById('passwordField').style.display = 'none';
-            document.getElementById('password').required = false;
-
-            document.getElementById('employeeModal').classList.add('active');
-            loadWarehouses();
-        } catch (error) {
-            console.error('Error loading employee:', error);
-            alert('Ошибка загрузки данных');
-        }
-    }
-
-    async function saveEmployee(event) {
-        event.preventDefault();
-
-        const data = {
-            first_name: document.getElementById('firstName').value,
-            last_name: document.getElementById('lastName').value,
-            middle_name: document.getElementById('middleName').value,
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value,
-            position_id: parseInt(document.getElementById('positionId').value),
-            warehouse_id: document.getElementById('warehouseId').value ? parseInt(document.getElementById('warehouseId').value) : null,
-            salary: document.getElementById('salary').value ? parseFloat(document.getElementById('salary').value) : null,
-            is_active: document.getElementById('isActive').checked,
-        };
-
-        if (!currentEmployeeId) {
-            data.password = document.getElementById('password').value;
-        }
-
-        try {
-            if (currentEmployeeId) {
-                await API.employees.update(currentEmployeeId, data);
-            } else {
-                await API.employees.create(data);
+        // Проверка авторизации
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
             }
 
-            closeModal();
             loadEmployees();
-            alert('Сохранено успешно');
-        } catch (error) {
-            console.error('Error saving employee:', error);
-            alert('Ошибка сохранения');
+            
+            // Обработчик формы добавления сотрудника
+            document.getElementById('employee-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addEmployee();
+            });
+
+            // Обработчик формы редактирования сотрудника
+            document.getElementById('edit-employee-form-content').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveEmployeeChanges();
+            });
+        });
+
+        // Загрузка сотрудников
+        function loadEmployees() {
+            // Демо-данные сотрудников
+            employees = [
+                {
+                    id: 1,
+                    name: 'Александр Иванов',
+                    position: 'Менеджер по продажам',
+                    email: 'alex.ivanov@amkodor.by',
+                    phone: '+375 29 123-45-67',
+                    hireDate: '2020-03-15',
+                    salary: 1500,
+                    status: 'Работает'
+                },
+                {
+                    id: 2,
+                    name: 'Елена Петрова',
+                    position: 'Сервисный инженер',
+                    email: 'elena.petrova@amkodor.by',
+                    phone: '+375 29 234-56-78',
+                    hireDate: '2021-06-01',
+                    salary: 1800,
+                    status: 'Работает'
+                }
+            ];
+            
+            displayEmployees(employees);
         }
-    }
 
-    async function deleteEmployee(id) {
-        if (!confirm('Удалить сотрудника?')) return;
-
-        try {
-            await API.employees.delete(id);
-            loadEmployees();
-            alert('Удалено');
-        } catch (error) {
-            console.error('Error deleting employee:', error);
-            alert('Ошибка удаления');
+        // Отображение сотрудников
+        function displayEmployees(employeesToShow) {
+            const grid = document.getElementById('employees-grid');
+            
+            if (employeesToShow.length === 0) {
+                grid.innerHTML = '<p>Сотрудники не найдены</p>';
+                return;
+            }
+            
+            grid.innerHTML = employeesToShow.map(employee => `
+                <div class="employee-card">
+                    <div class="employee-name">${employee.name}</div>
+                    <div class="employee-position">${employee.position}</div>
+                    <div class="employee-info">
+                        <p>📧 ${employee.email}</p>
+                        <p>📞 ${employee.phone}</p>
+                        <p>📅 Работает с ${new Date(employee.hireDate).toLocaleDateString('ru-RU')}</p>
+                        <p>💰 Зарплата: ${employee.salary} BYN</p>
+                        <p style="margin-top: 0.5rem;">
+                            <span style="padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600; ${getEmployeeStatusStyle(employee.status)}">${employee.status}</span>
+                        </p>
+                    </div>
+                    <div class="employee-actions">
+                        <button class="btn btn-primary" onclick="editEmployee(${employee.id})">Редактировать</button>
+                        <button class="btn btn-danger" onclick="fireAndDeleteEmployee(${employee.id})">Уволить</button>
+                    </div>
+                </div>
+            `).join('');
         }
-    }
 
-    function closeModal() {
-        document.getElementById('employeeModal').classList.remove('active');
-    }
+        // Получение стиля для статуса сотрудника
+        function getEmployeeStatusStyle(status) {
+            switch(status) {
+                case 'Работает':
+                    return 'background: #d1fae5; color: #065f46;';
+                case 'Уволен':
+                    return 'background: #fee2e2; color: #991b1b;';
+                case 'В отпуске':
+                    return 'background: #fef3c7; color: #92400e;';
+                case 'На больничном':
+                    return 'background: #e0e7ff; color: #3730a3;';
+                default:
+                    return 'background: #f3f4f6; color: #374151;';
+            }
+        }
 
-    function formatCurrency(value) {
-        return new Intl.NumberFormat('ru-BY', {
-            minimumFractionDigits: 2
-        }).format(value) + ' BYN';
-    }
+        // Показать форму добавления сотрудника
+        function showAddEmployeeForm() {
+            document.getElementById('add-employee-form').style.display = 'block';
+        }
 
-    function logout() {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-    }
+        // Скрыть форму добавления сотрудника
+        function hideAddEmployeeForm() {
+            document.getElementById('add-employee-form').style.display = 'none';
+            document.getElementById('employee-form').reset();
+        }
 
-    document.addEventListener('DOMContentLoaded', loadEmployees);
-</script>
+        // Скрыть форму редактирования сотрудника
+        function hideEditEmployeeForm() {
+            document.getElementById('edit-employee-form').style.display = 'none';
+            document.getElementById('edit-employee-form-content').reset();
+        }
+
+        // Добавить нового сотрудника
+        function addEmployee() {
+            const newEmployee = {
+                id: Date.now(),
+                name: document.getElementById('employee-name').value,
+                position: document.getElementById('employee-position').value,
+                email: document.getElementById('employee-email').value,
+                phone: document.getElementById('employee-phone').value,
+                hireDate: document.getElementById('employee-hire-date').value,
+                salary: parseInt(document.getElementById('employee-salary').value),
+                status: document.getElementById('employee-status').value
+            };
+
+            employees.push(newEmployee);
+            displayEmployees(employees);
+            hideAddEmployeeForm();
+            alert('Сотрудник успешно добавлен!');
+        }
+
+        // Сохранить изменения сотрудника
+        function saveEmployeeChanges() {
+            const employeeId = parseInt(document.getElementById('edit-employee-form').getAttribute('data-employee-id'));
+            const employee = employees.find(e => e.id === employeeId);
+            
+            if (!employee) {
+                alert('Сотрудник не найден');
+                return;
+            }
+
+            // Обновляем данные сотрудника
+            employee.name = document.getElementById('edit-employee-name').value;
+            employee.position = document.getElementById('edit-employee-position').value;
+            employee.email = document.getElementById('edit-employee-email').value;
+            employee.phone = document.getElementById('edit-employee-phone').value;
+            employee.hireDate = document.getElementById('edit-employee-hire-date').value;
+            employee.salary = parseInt(document.getElementById('edit-employee-salary').value);
+            employee.status = document.getElementById('edit-employee-status').value;
+
+            displayEmployees(employees);
+            hideEditEmployeeForm();
+            alert('Данные сотрудника успешно обновлены!');
+        }
+
+        // Редактирование сотрудника
+        function editEmployee(id) {
+            const employee = employees.find(e => e.id === id);
+            if (!employee) {
+                alert('Сотрудник не найден');
+                return;
+            }
+            
+            // Заполняем форму редактирования данными сотрудника
+            document.getElementById('edit-employee-name').value = employee.name;
+            document.getElementById('edit-employee-position').value = employee.position;
+            document.getElementById('edit-employee-email').value = employee.email;
+            document.getElementById('edit-employee-phone').value = employee.phone;
+            document.getElementById('edit-employee-hire-date').value = employee.hireDate;
+            document.getElementById('edit-employee-salary').value = employee.salary;
+            document.getElementById('edit-employee-status').value = employee.status;
+            
+            // Сохраняем ID редактируемого сотрудника
+            document.getElementById('edit-employee-form').setAttribute('data-employee-id', id);
+            
+            // Показываем форму редактирования
+            document.getElementById('edit-employee-form').style.display = 'block';
+        }
+
+        // Увольнение сотрудника
+        function fireEmployee(id) {
+            const employee = employees.find(e => e.id === id);
+            if (!employee) {
+                alert('Сотрудник не найден');
+                return;
+            }
+            
+            if (confirm(`Уволить "${employee.name}"?`)) {
+                employee.status = 'Уволен';
+                alert('Сотрудник уволен!');
+                displayEmployees(employees);
+            }
+        }
+
+        // Увольнение и удаление сотрудника
+        function fireAndDeleteEmployee(id) {
+            const employee = employees.find(e => e.id === id);
+            if (!employee) {
+                alert('Сотрудник не найден');
+                return;
+            }
+            
+            if (confirm(`Уволить и удалить "${employee.name}"? Это действие нельзя отменить.`)) {
+                employees = employees.filter(e => e.id !== id);
+                alert('Сотрудник уволен и удален!');
+                displayEmployees(employees);
+            }
+        }
+
+        // Выход из системы
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+
+        // Инициализация мобильного меню
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const adminContent = document.querySelector('.admin-content');
+
+            if (menuToggle && sidebar && adminContent) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('open');
+                    adminContent.classList.toggle('sidebar-open');
+                });
+
+                // Закрытие меню при клике вне его
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                        sidebar.classList.remove('open');
+                        adminContent.classList.remove('sidebar-open');
+                    }
+                });
+            }
+        });
+    </script>
+        </main>
+    </div>
 </body>
 </html>

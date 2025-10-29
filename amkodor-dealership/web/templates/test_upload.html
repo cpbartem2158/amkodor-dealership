@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест загрузки изображений</title>
+</head>
+<body>
+    <h1>Тест загрузки изображений</h1>
+    
+    <form id="uploadForm">
+        <input type="file" id="imageInput" accept="image/*" required>
+        <button type="submit">Загрузить изображение</button>
+    </form>
+    
+    <div id="result"></div>
+    <div id="preview"></div>
+    
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('imageInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Выберите файл');
+                return;
+            }
+            
+            console.log('Загрузка файла:', file.name, file.size, file.type);
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch('/api/vehicles/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Ответ сервера:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Ошибка сервера:', errorText);
+                    document.getElementById('result').innerHTML = '<p style="color: red;">Ошибка: ' + errorText + '</p>';
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('Результат загрузки:', result);
+                
+                if (result.success) {
+                    document.getElementById('result').innerHTML = '<p style="color: green;">Успешно загружено!</p><p>URL: ' + result.data.url + '</p>';
+                    document.getElementById('preview').innerHTML = '<img src="' + result.data.url + '" style="max-width: 300px; max-height: 200px;">';
+                } else {
+                    document.getElementById('result').innerHTML = '<p style="color: red;">Ошибка: ' + result.message + '</p>';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                document.getElementById('result').innerHTML = '<p style="color: red;">Ошибка: ' + error.message + '</p>';
+            }
+        });
+    </script>
+</body>
+</html>

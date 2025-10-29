@@ -3,304 +3,624 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ панель - Амкодор</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="/static/css/admin.css">
+    <title>Главная - Амкодор Админ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+        }
+
+        /* Admin Layout */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #1f2937;
+            color: white;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: #d1d5db;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .menu-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border-left-color: #3b82f6;
+        }
+
+        .menu-icon {
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+        }
+
+        .admin-content {
+            flex: 1;
+            margin-left: 0;
+            margin-top: 80px;
+            padding: 2rem;
+            background: #f8fafc;
+            min-height: calc(100vh - 80px);
+            transition: margin-left 0.3s ease;
+        }
+
+        .menu-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+            
+            .admin-content {
+                margin-left: 0;
+            }
+            
+            .admin-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: flex;
+            }
+        }
+
+        .admin-navbar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Стиль для кнопки "Выйти" */
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #1f2937;
+            color: white;
+            width: 250px;
+            min-height: calc(100vh - 80px);
+            position: fixed;
+            left: -250px;
+            top: 80px;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: #3b82f6;
+        }
+
+        .menu-icon {
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            margin-top: 80px;
+        }
+
+        .admin-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-section h1 {
+            color: #1f2937;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .stat-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-1px);
+        }
+
+        .action-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+            
+            .admin-content.sidebar-open {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="admin-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2>АМКОДОР</h2>
-            <p>Автосалон</p>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="/admin/dashboard" class="nav-item active">
-                <span class="icon">📊</span>
-                Дашборд
-            </a>
-            <a href="/admin/vehicles" class="nav-item">
-                <span class="icon">🚜</span>
-                Техника
-            </a>
-            <a href="/admin/sales" class="nav-item">
-                <span class="icon">💰</span>
-                Продажи
-            </a>
-            <a href="/admin/customers" class="nav-item">
-                <span class="icon">👥</span>
-                Клиенты
-            </a>
-            <a href="/admin/employees" class="nav-item">
-                <span class="icon">👔</span>
-                Сотрудники
-            </a>
-            <a href="/admin/service" class="nav-item">
-                <span class="icon">🔧</span>
-                Сервис
-            </a>
-            <a href="/admin/reports" class="nav-item">
-                <span class="icon">📈</span>
-                Отчеты
-            </a>
-            <a href="/admin/settings" class="nav-item">
-                <span class="icon">⚙️</span>
-                Настройки
-            </a>
+    <div class="admin-layout">
+        <!-- Navbar -->
+        <nav class="admin-navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <div class="logo">АМКОДОР - Главная</div>
+            </div>
+            <div class="navbar-right">
+                <div class="user-info">
+                    <span>Администратор</span>
+                    <button class="btn-logout" onclick="logout()">Выйти</button>
+                </div>
+            </div>
         </nav>
-        <div class="sidebar-footer">
-            <button onclick="logout()" class="btn-logout">Выход</button>
-        </div>
-    </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Header -->
-        <header class="main-header">
-            <h1>Панель управления</h1>
-            <div class="user-info">
-                <span id="userName">Загрузка...</span>
-                <div class="user-avatar">👤</div>
-            </div>
-        </header>
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-menu">
+                <a href="/admin/dashboard" class="menu-item active">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Главная</span>
+                </a>
+                <a href="/admin/vehicles" class="menu-item">
+                    <span class="menu-icon">🚜</span>
+                    <span class="menu-text">Техника</span>
+                </a>
+                <a href="/admin/employees" class="menu-item">
+                    <span class="menu-icon">👥</span>
+                    <span class="menu-text">Сотрудники</span>
+                </a>
+                <a href="/admin/customers" class="menu-item">
+                    <span class="menu-icon">👤</span>
+                    <span class="menu-text">Клиенты</span>
+                </a>
+                <a href="/admin/sales" class="menu-item">
+                    <span class="menu-icon">💰</span>
+                    <span class="menu-text">Продажи</span>
+                </a>
+                <a href="/admin/service" class="menu-item">
+                    <span class="menu-icon">🔧</span>
+                    <span class="menu-text">Сервис</span>
+                </a>
+                <a href="/admin/warehouses" class="menu-item">
+                    <span class="menu-icon">🏢</span>
+                    <span class="menu-text">Склады</span>
+                </a>
+                <a href="/admin/reports" class="menu-item">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Отчеты</span>
+                </a>
+                <a href="/admin/settings" class="menu-item">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Настройки</span>
+                </a>
+            </nav>
+        </aside>
 
-        <!-- Statistics Cards -->
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">🚜</div>
-                <div class="stat-info">
-                    <h3>Техника в наличии</h3>
-                    <p class="stat-value" id="availableVehicles">-</p>
-                    <span class="stat-label">единиц</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">💰</div>
-                <div class="stat-info">
-                    <h3>Продаж за месяц</h3>
-                    <p class="stat-value" id="salesLastMonth">-</p>
-                    <span class="stat-label">сделок</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">📈</div>
-                <div class="stat-info">
-                    <h3>Выручка за месяц</h3>
-                    <p class="stat-value" id="revenueLastMonth">-</p>
-                    <span class="stat-label">BYN</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-info">
-                    <h3>Всего клиентов</h3>
-                    <p class="stat-value" id="totalCustomers">-</p>
-                    <span class="stat-label">чел.</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Charts Section -->
-        <section class="charts-section">
-            <div class="chart-card">
-                <h3>Продажи по месяцам</h3>
-                <canvas id="salesChart"></canvas>
+        <!-- Main Content -->
+        <main class="admin-content" id="adminContent">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h1>Добро пожаловать в админ панель!</h1>
+                <p>Управляйте техникой, сотрудниками, клиентами и отслеживайте статистику продаж.</p>
             </div>
 
-            <div class="chart-card">
-                <h3>Топ категорий</h3>
-                <canvas id="categoriesChart"></canvas>
-            </div>
-        </section>
-
-        <!-- Recent Activity -->
-        <section class="activity-section">
-            <div class="activity-card">
-                <h3>Последние продажи</h3>
-                <div id="recentSales" class="activity-list">
-                    <p class="loading">Загрузка...</p>
-                </div>
-            </div>
-
-            <div class="activity-card">
-                <h3>Запланированные тест-драйвы</h3>
-                <div id="upcomingTestDrives" class="activity-list">
-                    <p class="loading">Загрузка...</p>
-                </div>
-            </div>
-        </section>
-    </main>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="/static/js/api.js"></script>
-<script src="/static/js/charts.js"></script>
-<script src="/static/js/admin.js"></script>
-<script>
-    // Загрузка статистики при загрузке страницы
-    document.addEventListener('DOMContentLoaded', async () => {
-        await loadDashboardData();
-    });
-
-    async function loadDashboardData() {
-        try {
-            // Загрузка статистики
-            const stats = await API.get('/admin/dashboard');
-
-            document.getElementById('availableVehicles').textContent = stats.available_vehicles || 0;
-            document.getElementById('salesLastMonth').textContent = stats.sales_last_month || 0;
-            document.getElementById('revenueLastMonth').textContent = formatCurrency(stats.revenue_last_month || 0);
-            document.getElementById('totalCustomers').textContent = stats.total_customers || 0;
-
-            // Загрузка данных для графиков
-            const chartData = await API.get('/admin/dashboard/charts');
-            renderCharts(chartData);
-
-            // Загрузка последних продаж
-            await loadRecentSales();
-
-            // Загрузка тест-драйвов
-            await loadUpcomingTestDrives();
-
-        } catch (error) {
-            console.error('Error loading dashboard data:', error);
-            showError('Ошибка загрузки данных');
-        }
-    }
-
-    async function loadRecentSales() {
-        try {
-            const sales = await API.get('/admin/sales?limit=5');
-            const container = document.getElementById('recentSales');
-
-            if (!sales || sales.length === 0) {
-                container.innerHTML = '<p class="empty">Нет данных</p>';
-                return;
-            }
-
-            container.innerHTML = sales.map(sale => `
-                    <div class="activity-item">
-                        <div class="activity-icon">💰</div>
-                        <div class="activity-content">
-                            <p class="activity-title">${sale.model_name}</p>
-                            <p class="activity-desc">${sale.client_name} - ${formatCurrency(sale.final_price)}</p>
-                            <p class="activity-time">${formatDate(sale.sale_date)}</p>
-                        </div>
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">🚜</div>
+                        <div class="stat-title">Всего техники</div>
                     </div>
-                `).join('');
-        } catch (error) {
-            console.error('Error loading recent sales:', error);
-        }
-    }
+                    <div class="stat-value" id="total-vehicles">0</div>
+                    <div class="stat-label">Единиц в наличии</div>
+                </div>
 
-    async function loadUpcomingTestDrives() {
-        try {
-            const testDrives = await API.get('/admin/test-drives?limit=5&status=Запланирован');
-            const container = document.getElementById('upcomingTestDrives');
-
-            if (!testDrives || testDrives.length === 0) {
-                container.innerHTML = '<p class="empty">Нет запланированных</p>';
-                return;
-            }
-
-            container.innerHTML = testDrives.map(td => `
-                    <div class="activity-item">
-                        <div class="activity-icon">🚗</div>
-                        <div class="activity-content">
-                            <p class="activity-title">${td.model_name}</p>
-                            <p class="activity-desc">${td.client_name}</p>
-                            <p class="activity-time">${formatDateTime(td.scheduled_date)}</p>
-                        </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-title">Сотрудников</div>
                     </div>
-                `).join('');
-        } catch (error) {
-            console.error('Error loading test drives:', error);
-        }
-    }
+                    <div class="stat-value" id="total-employees">0</div>
+                    <div class="stat-label">Активных сотрудников</div>
+                </div>
 
-    function logout() {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-    }
-</script>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">👤</div>
+                        <div class="stat-title">Клиентов</div>
+                    </div>
+                    <div class="stat-value" id="total-customers">0</div>
+                    <div class="stat-label">Зарегистрированных</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-title">Продажи</div>
+                    </div>
+                    <div class="stat-value" id="total-sales">0 ₽</div>
+                    <div class="stat-label">За текущий месяц</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2 class="section-title">Быстрые действия</h2>
+                <div class="actions-grid">
+                    <a href="/admin/vehicles" class="action-btn">
+                        <span class="action-icon">🚜</span>
+                        <span>Управление техникой</span>
+                    </a>
+                    <a href="/admin/employees" class="action-btn">
+                        <span class="action-icon">👥</span>
+                        <span>Управление сотрудниками</span>
+                    </a>
+                    <a href="/admin/customers" class="action-btn">
+                        <span class="action-icon">👤</span>
+                        <span>Управление клиентами</span>
+                    </a>
+                    <a href="/admin/sales" class="action-btn">
+                        <span class="action-icon">💰</span>
+                        <span>Продажи</span>
+                    </a>
+                    <a href="/admin/service" class="action-btn">
+                        <span class="action-icon">🔧</span>
+                        <span>Сервисное обслуживание</span>
+                    </a>
+                    <a href="/admin/warehouses" class="action-btn">
+                        <span class="action-icon">🏢</span>
+                        <span>Управление складами</span>
+                    </a>
+                    <a href="/admin/reports" class="action-btn">
+                        <span class="action-icon">📈</span>
+                        <span>Отчеты</span>
+                    </a>
+                    <a href="/admin/settings" class="action-btn">
+                        <span class="action-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle - будет инициализирован в DOMContentLoaded
+
+        // Загрузка статистики
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById('total-vehicles').textContent = data.data.totalVehicles || 0;
+                        document.getElementById('total-employees').textContent = data.data.totalEmployees || 0;
+                        document.getElementById('total-customers').textContent = data.data.totalCustomers || 0;
+                        document.getElementById('total-sales').textContent = (data.data.totalSales || 0) + ' ₽';
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики:', error);
+            }
+        }
+
+        // Загружаем статистику при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            
+            // Мобильное меню
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const adminContent = document.querySelector('.admin-content');
+
+            console.log('Menu toggle:', menuToggle);
+            console.log('Sidebar:', sidebar);
+            console.log('Admin content:', adminContent);
+
+            if (menuToggle && sidebar && adminContent) {
+                menuToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Menu toggle clicked!');
+                    sidebar.classList.toggle('open');
+                    adminContent.classList.toggle('sidebar-open');
+                });
+
+                // Закрытие меню при клике вне его
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                        sidebar.classList.remove('open');
+                        adminContent.classList.remove('sidebar-open');
+                    }
+                });
+
+                // Автозакрытие при переходе по ссылкам
+                const menuItems = document.querySelectorAll('.menu-item');
+                menuItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        sidebar.classList.remove('open');
+                        adminContent.classList.remove('sidebar-open');
+                    });
+                });
+            } else {
+                console.error('Не удалось найти элементы меню:', {
+                    menuToggle: !!menuToggle,
+                    sidebar: !!sidebar,
+                    adminContent: !!adminContent
+                });
+            }
+        });
+
+        // Выход из системы
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login';
+        }
+    </script>
 </body>
-</html> renderCharts(data) {
-// График продаж по месяцам
-const salesCtx = document.getElementById('salesChart').getContext('2d');
-new Chart(salesCtx, {
-type: 'line',
-data: {
-labels: data.months || [],
-datasets: [{
-label: 'Продажи',
-data: data.sales || [],
-borderColor: '#2563eb',
-backgroundColor: 'rgba(37, 99, 235, 0.1)',
-tension: 0.4
-}]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: {
-legend: {
-display: false
-}
-}
-}
-});
-
-// График по категориям
-const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
-new Chart(categoriesCtx, {
-type: 'doughnut',
-data: {
-labels: data.categories || [],
-datasets: [{
-data: data.category_sales || [],
-backgroundColor: [
-'#2563eb',
-'#10b981',
-'#f59e0b',
-'#ef4444',
-'#8b5cf6'
-]
-}]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: {
-legend: {
-position: 'bottom'
-}
-}
-}
-});
-}
-
-function formatCurrency(value) {
-return new Intl.NumberFormat('ru-BY', {
-style: 'decimal',
-minimumFractionDigits: 2,
-maximumFractionDigits: 2
-}).format(value);
-}
-
-function formatDate(date) {
-return new Date(date).toLocaleDateString('ru-BY');
-}
-
-function formatDateTime(date) {
-return new Date(date).toLocaleString('ru-BY');
-}
-
-function showError(message) {
-alert(message); // Можно заменить на более красивое уведомление
-}
-
-function
+</html>

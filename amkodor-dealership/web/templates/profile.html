@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - Амкодор</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <style>
+        /* Стиль для кнопки "Выйти" */
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        }
+
+        /* User Layout */
+        .user-layout {
+            display: flex;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+
+        .user-navbar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #1f2937;
+            color: white;
+            width: 250px;
+            min-height: calc(100vh - 80px);
+            position: fixed;
+            left: -250px;
+            top: 80px;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: #3b82f6;
+        }
+
+        .menu-icon {
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+        }
+
+        .user-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            margin-top: 80px;
+        }
+
+        .user-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        /* Profile Content */
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-input {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Mobile Sidebar */
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            transition: left 0.3s ease;
+        }
+
+        .mobile-sidebar.open {
+            left: 0;
+        }
+
+        .mobile-sidebar-content {
+            background: #1f2937;
+            width: 280px;
+            height: 100%;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .mobile-sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .mobile-sidebar-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 1rem;
+        }
+
+        .mobile-nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+            
+            .user-content.sidebar-open {
+                margin-left: 0;
+            }
+
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="user-layout">
+        <!-- Navbar -->
+        <nav class="user-navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <div class="logo">АМКОДОР - Профиль</div>
+            </div>
+            <div class="navbar-right">
+                <div class="user-info">
+                    <span id="user-name">Пользователь</span>
+                    <button class="btn-logout" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Mobile Sidebar -->
+        <div class="mobile-sidebar" id="mobileSidebar">
+            <div class="mobile-sidebar-content">
+                <div class="mobile-sidebar-header">
+                    <div class="mobile-sidebar-title">АМКОДОР</div>
+                    <button class="mobile-sidebar-close" id="mobileSidebarClose">×</button>
+                </div>
+                <ul class="mobile-nav-links">
+                    <li><a href="/">🏠 Главная</a></li>
+                    <li><a href="/catalog">🚜 Каталог</a></li>
+                    <li><a href="/orders">📋 Мои заказы</a></li>
+                    <li><a href="/favorites">❤️ Избранное</a></li>
+                    <li><a href="/service">🔧 Сервис</a></li>
+                    <li><a href="/profile">⚙️ Профиль</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-menu">
+                <a href="/" class="menu-item">
+                    <span class="menu-icon">🏠</span>
+                    <span class="menu-text">Главная</span>
+                </a>
+                <a href="/catalog" class="menu-item">
+                    <span class="menu-icon">🚜</span>
+                    <span class="menu-text">Каталог</span>
+                </a>
+                <a href="/orders" class="menu-item">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">Мои заказы</span>
+                </a>
+                <a href="/favorites" class="menu-item">
+                    <span class="menu-icon">❤️</span>
+                    <span class="menu-text">Избранное</span>
+                </a>
+                <a href="/service" class="menu-item">
+                    <span class="menu-icon">🔧</span>
+                    <span class="menu-text">Сервис</span>
+                </a>
+                <a href="/profile" class="menu-item active">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Профиль</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="user-content" id="userContent">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Профиль пользователя</h1>
+                <p class="page-description">Управляйте своими данными и настройками</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalOrders">3</div>
+                    <div class="stat-label">Всего заказов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="favoriteItems">5</div>
+                    <div class="stat-label">В избранном</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="serviceVisits">2</div>
+                    <div class="stat-label">Сервисных визитов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalSpent">450 000 ₽</div>
+                    <div class="stat-label">Потрачено</div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <!-- Personal Info -->
+                <div class="profile-card">
+                    <h3>Личная информация</h3>
+                    <form class="profile-form" id="personalForm">
+                        <div class="form-group">
+                            <label class="form-label">Имя</label>
+                            <input type="text" class="form-input" id="firstName" value="Иван">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Фамилия</label>
+                            <input type="text" class="form-input" id="lastName" value="Иванов">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="email" value="ivan@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Телефон</label>
+                            <input type="tel" class="form-input" id="phone" value="+375 29 123-45-67">
+                        </div>
+                        <button type="submit" class="btn-primary">Сохранить изменения</button>
+                    </form>
+                </div>
+
+                <!-- Company Info -->
+                <div class="profile-card">
+                    <h3>Информация о компании</h3>
+                    <form class="profile-form" id="companyForm">
+                        <div class="form-group">
+                            <label class="form-label">Название компании</label>
+                            <input type="text" class="form-input" id="companyName" value="ООО Стройтехника">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Должность</label>
+                            <input type="text" class="form-input" id="position" value="Директор">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Адрес</label>
+                            <textarea class="form-textarea" id="address">г. Минск, ул. Строительная, 123</textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">Сохранить изменения</button>
+                    </form>
+                </div>
+
+                <!-- Security -->
+                <div class="profile-card">
+                    <h3>Безопасность</h3>
+                    <form class="profile-form" id="securityForm">
+                        <div class="form-group">
+                            <label class="form-label">Текущий пароль</label>
+                            <input type="password" class="form-input" id="currentPassword">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Новый пароль</label>
+                            <input type="password" class="form-input" id="newPassword">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Подтвердите пароль</label>
+                            <input type="password" class="form-input" id="confirmPassword">
+                        </div>
+                        <button type="submit" class="btn-primary">Изменить пароль</button>
+                    </form>
+                </div>
+
+                <!-- Preferences -->
+                <div class="profile-card">
+                    <h3>Настройки</h3>
+                    <form class="profile-form" id="preferencesForm">
+                        <div class="form-group">
+                            <label class="form-label">Уведомления по email</label>
+                            <input type="checkbox" id="emailNotifications" checked>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Уведомления по SMS</label>
+                            <input type="checkbox" id="smsNotifications">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Язык интерфейса</label>
+                            <select class="form-input" id="language">
+                                <option value="ru" selected>Русский</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">Сохранить настройки</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Проверка авторизации
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const userName = localStorage.getItem('userName');
+            
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Отображаем имя пользователя
+            if (userName) {
+                document.getElementById('user-name').textContent = userName;
+            }
+
+            // Загружаем данные профиля
+            loadUserProfile();
+        });
+
+        // Mobile menu toggle
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const userContent = document.getElementById('userContent');
+            
+            if (sidebar && userContent) {
+                sidebar.classList.toggle('open');
+                userContent.classList.toggle('sidebar-open');
+            }
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            const userContent = document.getElementById('userContent');
+            
+            if (sidebar && menuToggle && userContent) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('open');
+                    userContent.classList.remove('sidebar-open');
+                }
+            }
+        });
+
+        // Auto-close sidebar when clicking menu items
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const sidebar = document.getElementById('sidebar');
+            const userContent = document.getElementById('userContent');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (sidebar && userContent) {
+                        sidebar.classList.remove('open');
+                        userContent.classList.remove('sidebar-open');
+                    }
+                });
+            });
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('open');
+                document.getElementById('userContent').classList.remove('sidebar-open');
+            }
+        });
+
+        // Auto-close sidebar when clicking menu items
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                userContent.classList.remove('sidebar-open');
+            });
+        });
+
+        // Загрузка профиля пользователя
+        async function loadUserProfile() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/user/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        // Заполняем форму данными пользователя
+                        const profile = data.data;
+                        document.getElementById('firstName').value = profile.name || '';
+                        document.getElementById('email').value = profile.email || '';
+                        document.getElementById('phone').value = profile.phone || '';
+                        document.getElementById('companyName').value = profile.company || '';
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки профиля:', error);
+            }
+        }
+
+        // Обработка форм
+        document.getElementById('personalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value
+            };
+            
+            // Здесь можно добавить API вызов для сохранения
+            alert('Личная информация сохранена!');
+        });
+
+        document.getElementById('companyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                companyName: document.getElementById('companyName').value,
+                position: document.getElementById('position').value,
+                address: document.getElementById('address').value
+            };
+            
+            alert('Информация о компании сохранена!');
+        });
+
+        document.getElementById('securityForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                alert('Пароли не совпадают!');
+                return;
+            }
+            
+            alert('Пароль изменен!');
+        });
+
+        document.getElementById('preferencesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const emailNotifications = document.getElementById('emailNotifications').checked;
+            const smsNotifications = document.getElementById('smsNotifications').checked;
+            const language = document.getElementById('language').value;
+            
+            alert('Настройки сохранены!');
+        });
+
+        // Выход из системы
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

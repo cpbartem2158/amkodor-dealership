@@ -11,8 +11,8 @@ type CustomerRepository struct {
 	db *sql.DB
 }
 
-func NewCustomerRepository(db *sql.DB) *CustomerRepository {
-	return &CustomerRepository{db: db}
+func NewCustomerRepository(db *sql.DB) CustomerRepository {
+	return CustomerRepository{db: db}
 }
 
 // GetAll возвращает всех клиентов

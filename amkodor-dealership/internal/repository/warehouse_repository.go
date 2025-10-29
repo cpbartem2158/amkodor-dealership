@@ -11,8 +11,8 @@ type WarehouseRepository struct {
 	db *sql.DB
 }
 
-func NewWarehouseRepository(db *sql.DB) *WarehouseRepository {
-	return &WarehouseRepository{db: db}
+func NewWarehouseRepository(db *sql.DB) WarehouseRepository {
+	return WarehouseRepository{db: db}
 }
 
 // GetAll возвращает все склады
@@ -124,6 +124,18 @@ func (r *WarehouseRepository) Update(w *models.Warehouse) error {
 
 	if rows == 0 {
 		return fmt.Errorf("warehouse not found")
+	}
+
+	return nil
+}
+
+// Delete удаляет склад
+func (r *WarehouseRepository) Delete(id int) error {
+	query := `DELETE FROM warehouses WHERE warehouse_id = $1`
+
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("error deleting warehouse: %w", err)
 	}
 
 	return nil

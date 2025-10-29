@@ -11,8 +11,8 @@ type EmployeeRepository struct {
 	db *sql.DB
 }
 
-func NewEmployeeRepository(db *sql.DB) *EmployeeRepository {
-	return &EmployeeRepository{db: db}
+func NewEmployeeRepository(db *sql.DB) EmployeeRepository {
+	return EmployeeRepository{db: db}
 }
 
 // GetAll возвращает всех сотрудников

@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -60,37 +59,6 @@ func AuthMiddleware(secret string) func(http.Handler) http.Handler {
 	}
 }
 
-// LoggingMiddleware логирует все HTTP запросы
-func LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		// Создаем обертку для ResponseWriter чтобы перехватить status code
-		wrapped := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
-
-		next.ServeHTTP(wrapped, r)
-
-		duration := time.Since(start)
-		log.Printf(
-			"%s %s %d %s %s",
-			r.Method,
-			r.RequestURI,
-			wrapped.statusCode,
-			duration,
-			r.RemoteAddr,
-		)
-	})
-}
-
-type responseWriter struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-func (rw *responseWriter) WriteHeader(code int) {
-	rw.statusCode = code
-	rw.ResponseWriter.WriteHeader(code)
-}
 
 // RecoveryMiddleware обрабатывает панику
 func RecoveryMiddleware(next http.Handler) http.Handler {

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки - Амкодор</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+        }
+
+        /* Admin Layout Styles */
+        .admin-layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .admin-navbar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .admin-logo {
+            color: white;
+            text-decoration: none;
+        }
+
+        .admin-logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar {
+            background: #1f2937;
+            color: white;
+            width: 250px;
+            min-height: calc(100vh - 80px);
+            position: fixed;
+            left: -250px;
+            top: 80px;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Стиль для кнопки "Выйти" */
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        }
+
+        .admin-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: #d1d5db;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #374151;
+            color: white;
+        }
+
+        .menu-item.active {
+            background: #1d4ed8;
+            color: white;
+            border-left-color: #60a5fa;
+        }
+
+        .menu-icon {
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #1f2937;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .setting-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .setting-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .setting-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .setting-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .setting-description {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Navigation -->
+        <nav class="admin-navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <a href="/admin/dashboard" class="admin-logo">
+                    <h1>АМКОДОР</h1>
+                </a>
+            </div>
+
+            <div class="navbar-right">
+                <div class="user-info">
+                    <span>Администратор</span>
+                    <button class="btn-logout" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-menu">
+                <a href="/admin/dashboard" class="menu-item">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Главная</span>
+                </a>
+                <a href="/admin/vehicles" class="menu-item">
+                    <span class="menu-icon">🚜</span>
+                    <span class="menu-text">Техника</span>
+                </a>
+                <a href="/admin/sales" class="menu-item">
+                    <span class="menu-icon">💰</span>
+                    <span class="menu-text">Продажи</span>
+                </a>
+                <a href="/admin/customers" class="menu-item">
+                    <span class="menu-icon">👥</span>
+                    <span class="menu-text">Клиенты</span>
+                </a>
+                <a href="/admin/employees" class="menu-item">
+                    <span class="menu-icon">👔</span>
+                    <span class="menu-text">Сотрудники</span>
+                </a>
+                <a href="/admin/warehouses" class="menu-item">
+                    <span class="menu-icon">🏢</span>
+                    <span class="menu-text">Склады</span>
+                </a>
+                <a href="/admin/service" class="menu-item">
+                    <span class="menu-icon">🔧</span>
+                    <span class="menu-text">Сервис</span>
+                </a>
+                <a href="/admin/reports" class="menu-item">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Отчёты</span>
+                </a>
+                <a href="/admin/settings" class="menu-item active">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Настройки</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+        <h1 class="page-title">Настройки системы</h1>
+        
+        <div class="settings-grid">
+            <div class="setting-card">
+                <div class="setting-icon">👤</div>
+                <div class="setting-title">Управление пользователями</div>
+                <div class="setting-description">Добавление, редактирование и удаление пользователей системы</div>
+                <button class="btn btn-primary" onclick="manageUsers()">Управлять</button>
+            </div>
+            
+            <div class="setting-card">
+                <div class="setting-icon">🏢</div>
+                <div class="setting-title">Настройки компании</div>
+                <div class="setting-description">Информация о компании, контакты, адреса</div>
+                <button class="btn btn-primary" onclick="companySettings()">Настроить</button>
+            </div>
+            
+            <div class="setting-card">
+                <div class="setting-icon">🔧</div>
+                <div class="setting-title">Системные настройки</div>
+                <div class="setting-description">Конфигурация системы, базы данных, API</div>
+                <button class="btn btn-primary" onclick="systemSettings()">Настроить</button>
+            </div>
+            
+            <div class="setting-card">
+                <div class="setting-icon">📊</div>
+                <div class="setting-title">Настройки отчетов</div>
+                <div class="setting-description">Конфигурация шаблонов отчетов и экспорта</div>
+                <button class="btn btn-primary" onclick="reportSettings()">Настроить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Проверка авторизации
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+        });
+
+        // Управление пользователями
+        function manageUsers() {
+            alert('Управление пользователями');
+        }
+
+        // Настройки компании
+        function companySettings() {
+            alert('Настройки компании');
+        }
+
+        // Системные настройки
+        function systemSettings() {
+            alert('Системные настройки');
+        }
+
+        // Настройки отчетов
+        function reportSettings() {
+            alert('Настройки отчетов');
+        }
+
+        // Выход из системы
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const adminContent = document.querySelector('.admin-content');
+
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('open');
+                    adminContent.classList.toggle('sidebar-open');
+                });
+            }
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('open');
+                    adminContent.classList.remove('sidebar-open');
+                }
+            });
+
+            // Auto-close sidebar when clicking menu items
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    sidebar.classList.remove('open');
+                    adminContent.classList.remove('sidebar-open');
+                });
+            });
+        });
+    </script>
+        </main>
+    </div>
+</body>
+</html>

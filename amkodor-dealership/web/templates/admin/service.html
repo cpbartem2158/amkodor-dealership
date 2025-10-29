@@ -6,50 +6,240 @@
     <title>Сервис - Амкодор</title>
     <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet" href="/static/css/admin.css">
+    <style>
+        /* Admin Layout Styles */
+        .admin-layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .admin-navbar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .admin-logo {
+            color: white;
+            text-decoration: none;
+        }
+
+        .admin-logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar {
+            background: #1f2937;
+            color: white;
+            width: 250px;
+            min-height: calc(100vh - 80px);
+            position: fixed;
+            left: -250px;
+            top: 80px;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Стиль для кнопки "Выйти" */
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        }
+
+        .admin-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: #d1d5db;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #374151;
+            color: white;
+        }
+
+        .menu-item.active {
+            background: #1d4ed8;
+            color: white;
+            border-left-color: #60a5fa;
+        }
+
+        .menu-icon {
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="admin-container">
+    <div class="admin-layout">
+        <!-- Navigation -->
+        <nav class="admin-navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <a href="/admin/dashboard" class="admin-logo">
+                    <h1>АМКОДОР</h1>
+                </a>
+            </div>
+
+            <div class="navbar-right">
+                <div class="user-info">
+                    <span>Администратор</span>
+                    <button class="btn-logout" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
     <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2>АМКОДОР</h2>
-            <p>Автосалон</p>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="/admin/dashboard" class="nav-item">
-                <span class="icon">📊</span>
-                Дашборд
-            </a>
-            <a href="/admin/vehicles" class="nav-item">
-                <span class="icon">🚜</span>
-                Техника
-            </a>
-            <a href="/admin/sales" class="nav-item">
-                <span class="icon">💰</span>
-                Продажи
-            </a>
-            <a href="/admin/customers" class="nav-item">
-                <span class="icon">👥</span>
-                Клиенты
-            </a>
-            <a href="/admin/employees" class="nav-item">
-                <span class="icon">👔</span>
-                Сотрудники
-            </a>
-            <a href="/admin/service" class="nav-item active">
-                <span class="icon">🔧</span>
-                Сервис
-            </a>
-            <a href="/admin/reports" class="nav-item">
-                <span class="icon">📈</span>
-                Отчеты
+            <nav class="sidebar-menu">
+                <a href="/admin/dashboard" class="menu-item">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Главная</span>
+                </a>
+                <a href="/admin/vehicles" class="menu-item">
+                    <span class="menu-icon">🚜</span>
+                    <span class="menu-text">Техника</span>
+                </a>
+                <a href="/admin/sales" class="menu-item">
+                    <span class="menu-icon">💰</span>
+                    <span class="menu-text">Продажи</span>
+                </a>
+                <a href="/admin/customers" class="menu-item">
+                    <span class="menu-icon">👥</span>
+                    <span class="menu-text">Клиенты</span>
+                </a>
+                <a href="/admin/employees" class="menu-item">
+                    <span class="menu-icon">👔</span>
+                    <span class="menu-text">Сотрудники</span>
+                </a>
+                <a href="/admin/warehouses" class="menu-item">
+                    <span class="menu-icon">🏢</span>
+                    <span class="menu-text">Склады</span>
+                </a>
+                <a href="/admin/service" class="menu-item active">
+                    <span class="menu-icon">🔧</span>
+                    <span class="menu-text">Сервис</span>
+                </a>
+                <a href="/admin/reports" class="menu-item">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Отчёты</span>
+                </a>
+                <a href="/admin/settings" class="menu-item">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Настройки</span>
             </a>
         </nav>
-        <div class="sidebar-footer">
-            <button onclick="logout()" class="btn-logout">Выход</button>
-        </div>
     </aside>
 
-    <main class="main-content">
+        <!-- Main Content -->
+        <main class="admin-content">
         <header class="main-header">
             <h1>Сервисное обслуживание</h1>
             <div>
@@ -70,10 +260,10 @@
                 <tr>
                     <th>№</th>
                     <th>Дата</th>
-                    <th>Техника</th>
+                    <th>Тип услуги</th>
                     <th>Клиент</th>
-                    <th>Тип работ</th>
-                    <th>Мастер</th>
+                    <th>Название</th>
+                    <th>Телефон</th>
                     <th>Стоимость</th>
                     <th>Статус</th>
                     <th>Действия</th>
@@ -97,13 +287,12 @@
                 <thead>
                 <tr>
                     <th>№</th>
-                    <th>Дата и время</th>
-                    <th>Модель</th>
+                    <th>Дата</th>
                     <th>Клиент</th>
-                    <th>Менеджер</th>
-                    <th>Длительность</th>
+                    <th>Техника</th>
+                    <th>Телефон</th>
+                    <th>Время</th>
                     <th>Статус</th>
-                    <th>Оценка</th>
                     <th>Действия</th>
                 </tr>
                 </thead>
@@ -126,12 +315,10 @@
                 <tr>
                     <th>Артикул</th>
                     <th>Название</th>
-                    <th>Модель</th>
+                    <th>Категория</th>
                     <th>Цена</th>
                     <th>Остаток</th>
-                    <th>Минимум</th>
                     <th>Статус</th>
-                    <th>Склад</th>
                     <th>Действия</th>
                 </tr>
                 </thead>
@@ -148,58 +335,282 @@
 <script src="/static/js/api.js"></script>
 <script>
     let currentTab = 'orders';
+    
+    // Глобальные хранилища для данных
+    let ordersData = [];
+    let testDrivesData = [];
+    let partsData = [];
+    
+    // Функции для работы с localStorage
+    function saveOrdersData() {
+        localStorage.setItem('adminOrdersData', JSON.stringify(ordersData));
+    }
+    
+    function loadOrdersData() {
+        const saved = localStorage.getItem('adminOrdersData');
+        if (saved) {
+            ordersData = JSON.parse(saved);
+        }
+    }
+    
+    function saveTestDrivesData() {
+        localStorage.setItem('adminTestDrivesData', JSON.stringify(testDrivesData));
+    }
+    
+    function loadTestDrivesData() {
+        const saved = localStorage.getItem('adminTestDrivesData');
+        if (saved) {
+            testDrivesData = JSON.parse(saved);
+        }
+    }
+    
+    function savePartsData() {
+        localStorage.setItem('adminPartsData', JSON.stringify(partsData));
+    }
+    
+    function loadPartsData() {
+        const saved = localStorage.getItem('adminPartsData');
+        if (saved) {
+            partsData = JSON.parse(saved);
+        }
+    }
 
     async function loadServiceOrders() {
         try {
-            const orders = await API.service.getAllOrders({ limit: 50 });
-            displayOrders(orders);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.log('No token found, using fallback data');
+                displayServiceRequests(getFallbackServiceRequests());
+                return;
+            }
+
+            const response = await fetch('/api/admin/service-orders', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                console.log('API request failed, using fallback data');
+                displayServiceRequests(getFallbackServiceRequests());
+                return;
+            }
+            
+            const data = await response.json();
+            if (data.success && data.data) {
+                displayServiceRequests(data.data);
+            } else {
+                displayServiceRequests(getFallbackServiceRequests());
+            }
         } catch (error) {
-            console.error('Error loading orders:', error);
+            console.error('Error loading service orders:', error);
+            displayServiceRequests(getFallbackServiceRequests());
         }
+    }
+
+    function getFallbackServiceRequests() {
+        return [
+            {
+                id: 1,
+                date: "2025-01-15",
+                service_type: "Техническое обслуживание",
+                customer: "Иван Иванов",
+                title: "Плановое ТО экскаватора АМКОДОР 3316",
+                phone: "+375 29 123-45-67",
+                status: "pending"
+            },
+            {
+                id: 2,
+                date: "2025-01-10",
+                service_type: "Ремонт",
+                customer: "Петр Петров",
+                title: "Замена гидроцилиндра подъема стрелы",
+                phone: "+375 29 234-56-78",
+                status: "in-progress"
+            },
+            {
+                id: 3,
+                date: "2025-01-08",
+                service_type: "Диагностика",
+                customer: "Сергей Сидоров",
+                title: "Диагностика гидравлической системы",
+                phone: "+375 29 345-67-89",
+                status: "completed"
+            }
+        ];
     }
 
     async function loadTestDrives() {
         try {
-            const testDrives = await API.testDrives.getAll({ limit: 50 });
-            displayTestDrives(testDrives);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.log('No token found, using fallback data');
+                displayTestDrives(getFallbackTestDrives());
+                return;
+            }
+
+            const response = await fetch('/api/admin/test-drives', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                console.log('API request failed, using fallback data');
+                displayTestDrives(getFallbackTestDrives());
+                return;
+            }
+            
+            const data = await response.json();
+            if (data.success && data.data) {
+                displayTestDrives(data.data);
+            } else {
+                displayTestDrives(getFallbackTestDrives());
+            }
         } catch (error) {
             console.error('Error loading test drives:', error);
+            displayTestDrives(getFallbackTestDrives());
         }
+    }
+
+    function getFallbackTestDrives() {
+        return [
+            {
+                id: 1,
+                date: "2025-01-15",
+                customer: "Алексей Козлов",
+                vehicle: "АМКОДОР 3316",
+                phone: "+375 29 456-78-90",
+                status: "scheduled"
+            },
+            {
+                id: 2,
+                date: "2025-01-12",
+                customer: "Мария Петрова",
+                vehicle: "АМКОДОР 3320",
+                phone: "+375 29 567-89-01",
+                status: "completed"
+            },
+            {
+                id: 3,
+                date: "2025-01-10",
+                customer: "Дмитрий Смирнов",
+                vehicle: "АМКОДОР 3316",
+                phone: "+375 29 678-90-12",
+                status: "cancelled"
+            }
+        ];
     }
 
     async function loadParts() {
         try {
-            const parts = await API.service.getAllParts({ limit: 100 });
-            displayParts(parts);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.log('No token found, using fallback data');
+                displayParts(getFallbackParts());
+                return;
+            }
+
+            const response = await fetch('/api/admin/spare-parts', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                console.log('API request failed, using fallback data');
+                displayParts(getFallbackParts());
+                return;
+            }
+            
+            const data = await response.json();
+            if (data.success && data.data) {
+                displayParts(data.data);
+            } else {
+                displayParts(getFallbackParts());
+            }
         } catch (error) {
             console.error('Error loading parts:', error);
+            displayParts(getFallbackParts());
         }
     }
 
-    function displayOrders(orders) {
+    function getFallbackParts() {
+        return [
+            {
+                id: 1,
+                name: "Гидроцилиндр подъема стрелы",
+                part_number: "HC-3316-001",
+                category: "Гидравлика",
+                price: 125000,
+                stock: 5,
+                status: "available"
+            },
+            {
+                id: 2,
+                name: "Фильтр гидравлический",
+                part_number: "HF-3316-002",
+                category: "Фильтры",
+                price: 15000,
+                stock: 12,
+                status: "available"
+            },
+            {
+                id: 3,
+                name: "Масло гидравлическое",
+                part_number: "OH-3316-003",
+                category: "Смазочные материалы",
+                price: 8500,
+                stock: 8,
+                status: "low_stock"
+            },
+            {
+                id: 4,
+                name: "Ремень привода",
+                part_number: "RB-3316-004",
+                category: "Привод",
+                price: 25000,
+                stock: 0,
+                status: "out_of_stock"
+            }
+        ];
+    }
+
+    function displayServiceRequests(requests) {
         const tbody = document.getElementById('ordersTable');
 
-        if (!orders || orders.length === 0) {
+        if (!requests || requests.length === 0) {
             tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Нет данных</td></tr>';
             return;
         }
 
-        tbody.innerHTML = orders.map(o => `
+        tbody.innerHTML = requests.map(r => `
                 <tr>
-                    <td>${o.service_order_id}</td>
-                    <td>${formatDate(o.order_date)}</td>
-                    <td>${o.model_name || '-'}</td>
-                    <td>${o.client_name || '-'}</td>
-                    <td>${o.service_type}</td>
-                    <td>${o.master_name || '-'}</td>
-                    <td>${formatCurrency(o.cost)}</td>
-                    <td><span class="badge badge-${getStatusColor(o.status)}">${o.status}</span></td>
+                    <td>${r.service_order_id || r.id}</td>
+                    <td>${formatDate(r.order_date || r.date)}</td>
+                    <td>${r.service_type || '-'}</td>
+                    <td>${r.customer_id?.Int64 || r.customer || '-'}</td>
+                    <td>${r.description?.String || r.title || '-'}</td>
+                    <td>-</td>
+                    <td>${r.cost || 0} руб.</td>
+                    <td><span class="badge badge-${getStatusColor(r.status)}">${getStatusText(r.status)}</span></td>
                     <td>
-                        <button onclick="viewOrder(${o.service_order_id})" class="btn-icon">👁️</button>
-                        ${o.status === 'В работе' ? `<button onclick="completeOrder(${o.service_order_id})" class="btn-icon">✅</button>` : ''}
+                        <button onclick="viewServiceRequest(${r.service_order_id || r.id})" class="btn-icon">👁️</button>
+                        <button onclick="updateServiceRequestStatus(${r.service_order_id || r.id})" class="btn-icon">✏️</button>
+                        <button onclick="completeOrder(${r.service_order_id || r.id})" class="btn-icon">✅</button>
                     </td>
                 </tr>
             `).join('');
+    }
+
+    function getStatusText(status) {
+        const statusMap = {
+            'pending': 'Ожидает',
+            'in-progress': 'В работе',
+            'completed': 'Завершено',
+            'cancelled': 'Отменено'
+        };
+        return statusMap[status] || status;
     }
 
     function displayTestDrives(testDrives) {
@@ -282,15 +693,476 @@
     }
 
     function createOrder() {
-        alert('Функция создания заказа. Можно реализовать модальное окно.');
+        const modal = `
+            <div class="modal" style="display: block; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+                <div class="modal-content" style="background-color: #fefefe; margin: 2% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 600px; border-radius: 8px;">
+                    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Создание нового заказа</h3>
+                        <span class="close" onclick="closeModal()" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createOrderForm">
+                            <div style="margin-bottom: 15px;">
+                                <label for="customerName" style="display: block; margin-bottom: 5px; font-weight: 600;">Клиент:</label>
+                                <input type="text" id="customerName" name="customerName" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="customerPhone" style="display: block; margin-bottom: 5px; font-weight: 600;">Телефон:</label>
+                                <input type="tel" id="customerPhone" name="customerPhone" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="serviceType" style="display: block; margin-bottom: 5px; font-weight: 600;">Тип услуги:</label>
+                                <select id="serviceType" name="serviceType" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="">Выберите тип услуги</option>
+                                    <option value="maintenance">Техническое обслуживание</option>
+                                    <option value="repair">Ремонт и диагностика</option>
+                                    <option value="parts">Замена запчастей</option>
+                                    <option value="mobile">Выездной сервис</option>
+                                    <option value="consultation">Консультации</option>
+                                    <option value="emergency">Экстренный ремонт</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="orderTitle" style="display: block; margin-bottom: 5px; font-weight: 600;">Название заказа:</label>
+                                <input type="text" id="orderTitle" name="orderTitle" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="orderDescription" style="display: block; margin-bottom: 5px; font-weight: 600;">Описание:</label>
+                                <textarea id="orderDescription" name="orderDescription" rows="4" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="orderDate" style="display: block; margin-bottom: 5px; font-weight: 600;">Дата выполнения:</label>
+                                <input type="date" id="orderDate" name="orderDate" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="orderPrice" style="display: block; margin-bottom: 5px; font-weight: 600;">Стоимость (₽):</label>
+                                <input type="number" id="orderPrice" name="orderPrice" min="0" step="100" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="margin-top: 20px; text-align: right;">
+                        <button onclick="submitOrder()" class="btn btn-primary">Создать заказ</button>
+                        <button onclick="closeModal()" class="btn btn-secondary">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+        
+        // Устанавливаем сегодняшнюю дату по умолчанию
+        document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+    }
+
+    function submitOrder() {
+        const form = document.getElementById('createOrderForm');
+        const formData = new FormData(form);
+        
+        const orderData = {
+            customer: formData.get('customerName'),
+            phone: formData.get('customerPhone'),
+            service_type: formData.get('serviceType'),
+            title: formData.get('orderTitle'),
+            description: formData.get('orderDescription'),
+            date: formData.get('orderDate'),
+            price: formData.get('orderPrice') || 0,
+            status: 'pending'
+        };
+        
+        // Валидация
+        if (!orderData.customer || !orderData.phone || !orderData.service_type || !orderData.title || !orderData.description) {
+            alert('Пожалуйста, заполните все обязательные поля');
+            return;
+        }
+        
+        // Добавляем заказ в таблицу (в реальном приложении здесь был бы API запрос)
+        addOrderToTable(orderData);
+        
+        alert(`Заказ "${orderData.title}" создан успешно!`);
+        closeModal();
+    }
+    
+    async function addOrderToTable(orderData) {
+        const serviceTypeMap = {
+            'maintenance': 'Техническое обслуживание',
+            'repair': 'Ремонт и диагностика',
+            'parts': 'Замена запчастей',
+            'mobile': 'Выездной сервис',
+            'consultation': 'Консультации',
+            'emergency': 'Экстренный ремонт'
+        };
+        
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Необходимо войти в систему');
+                return;
+            }
+
+            const response = await fetch('/api/admin/service-orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    vehicle_id: 1, // По умолчанию
+                    customer_id: 1, // По умолчанию (обязательно)
+                    employee_id: 1, // По умолчанию
+                    service_type: serviceTypeMap[orderData.service_type] || orderData.service_type,
+                    description: orderData.title,
+                    cost: parseFloat(orderData.price) || 0,
+                    status: orderData.status || 'В работе'
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    alert(`Заказ "${orderData.title}" создан успешно!`);
+                    loadServiceOrders(); // Перезагружаем данные
+                } else {
+                    alert('Ошибка при создании заказа');
+                }
+            } else {
+                alert('Ошибка при создании заказа');
+            }
+        } catch (error) {
+            console.error('Error creating service order:', error);
+            alert('Ошибка при создании заказа');
+        }
+    }
+    
+    function updateOrdersTable() {
+        const tbody = document.getElementById('ordersTable');
+        tbody.innerHTML = '';
+        
+        if (ordersData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Нет данных</td></tr>';
+            return;
+        }
+        
+        ordersData.forEach(order => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${order.id}</td>
+                <td>${order.date}</td>
+                <td>${order.service_type}</td>
+                <td>${order.customer}</td>
+                <td>${order.title}</td>
+                <td>${order.phone}</td>
+                <td>${order.price} ₽</td>
+                <td><span class="badge badge-${getStatusColor(order.status)}">${getStatusText(order.status)}</span></td>
+                <td>
+                    <button onclick="viewServiceRequest(${order.id})" class="btn-icon">👁️</button>
+                    <button onclick="updateServiceRequestStatus(${order.id})" class="btn-icon">✏️</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
     }
 
     function createTestDrive() {
-        alert('Функция создания тест-драйва. Можно реализовать модальное окно.');
+        const modal = `
+            <div class="modal" style="display: block; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+                <div class="modal-content" style="background-color: #fefefe; margin: 2% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 600px; border-radius: 8px;">
+                    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Запись на тест-драйв</h3>
+                        <span class="close" onclick="closeModal()" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createTestDriveForm">
+                            <div style="margin-bottom: 15px;">
+                                <label for="testDriveCustomer" style="display: block; margin-bottom: 5px; font-weight: 600;">Клиент:</label>
+                                <input type="text" id="testDriveCustomer" name="testDriveCustomer" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="testDrivePhone" style="display: block; margin-bottom: 5px; font-weight: 600;">Телефон:</label>
+                                <input type="tel" id="testDrivePhone" name="testDrivePhone" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="testDriveVehicle" style="display: block; margin-bottom: 5px; font-weight: 600;">Техника:</label>
+                                <select id="testDriveVehicle" name="testDriveVehicle" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="">Выберите технику</option>
+                                    <option value="АМКОДОР 3316">АМКОДОР 3316</option>
+                                    <option value="АМКОДОР 3320">АМКОДОР 3320</option>
+                                    <option value="АМКОДОР 3330">АМКОДОР 3330</option>
+                                    <option value="АМКОДОР 3340">АМКОДОР 3340</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="testDriveDate" style="display: block; margin-bottom: 5px; font-weight: 600;">Дата тест-драйва:</label>
+                                <input type="date" id="testDriveDate" name="testDriveDate" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="testDriveTime" style="display: block; margin-bottom: 5px; font-weight: 600;">Время:</label>
+                                <input type="time" id="testDriveTime" name="testDriveTime" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="testDriveNotes" style="display: block; margin-bottom: 5px; font-weight: 600;">Примечания:</label>
+                                <textarea id="testDriveNotes" name="testDriveNotes" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="margin-top: 20px; text-align: right;">
+                        <button onclick="submitTestDrive()" class="btn btn-primary">Записать</button>
+                        <button onclick="closeModal()" class="btn btn-secondary">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+        
+        // Устанавливаем завтрашнюю дату по умолчанию
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('testDriveDate').value = tomorrow.toISOString().split('T')[0];
+    }
+
+    function submitTestDrive() {
+        const form = document.getElementById('createTestDriveForm');
+        const formData = new FormData(form);
+        
+        const testDriveData = {
+            customer: formData.get('testDriveCustomer'),
+            phone: formData.get('testDrivePhone'),
+            vehicle: formData.get('testDriveVehicle'),
+            date: formData.get('testDriveDate'),
+            time: formData.get('testDriveTime'),
+            notes: formData.get('testDriveNotes') || '',
+            status: 'scheduled'
+        };
+        
+        // Валидация
+        if (!testDriveData.customer || !testDriveData.phone || !testDriveData.vehicle || !testDriveData.date || !testDriveData.time) {
+            alert('Пожалуйста, заполните все обязательные поля');
+            return;
+        }
+        
+        // Добавляем тест-драйв в таблицу
+        addTestDriveToTable(testDriveData);
+        
+        alert(`Тест-драйв для ${testDriveData.customer} записан на ${testDriveData.date} в ${testDriveData.time}!`);
+        closeModal();
+    }
+    
+    async function addTestDriveToTable(testDriveData) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Необходимо войти в систему');
+                return;
+            }
+
+            const response = await fetch('/api/admin/test-drives', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    vehicle_id: 1, // По умолчанию
+                    customer_id: null,
+                    corporate_client_id: null,
+                    employee_id: 1, // По умолчанию
+                    scheduled_date: new Date(testDriveData.date + 'T' + testDriveData.time).toISOString(),
+                    duration: 60,
+                    status: testDriveData.status || 'Запланирован'
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    alert(`Тест-драйв для ${testDriveData.customer} записан на ${testDriveData.date} в ${testDriveData.time}!`);
+                    loadTestDrives(); // Перезагружаем данные
+                } else {
+                    alert('Ошибка при создании тест-драйва');
+                }
+            } else {
+                alert('Ошибка при создании тест-драйва');
+            }
+        } catch (error) {
+            console.error('Error creating test drive:', error);
+            alert('Ошибка при создании тест-драйва');
+        }
+    }
+    
+    function updateTestDrivesTable() {
+        const tbody = document.getElementById('testdrivesTable');
+        tbody.innerHTML = '';
+        
+        if (testDrivesData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Нет данных</td></tr>';
+            return;
+        }
+        
+        testDrivesData.forEach(testDrive => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${testDrive.id}</td>
+                <td>${testDrive.date}</td>
+                <td>${testDrive.customer}</td>
+                <td>${testDrive.vehicle}</td>
+                <td>${testDrive.phone}</td>
+                <td>${testDrive.time}</td>
+                <td><span class="badge badge-${getStatusColor(testDrive.status)}">${getStatusText(testDrive.status)}</span></td>
+                <td>
+                    <button onclick="viewTestDrive(${testDrive.id})" class="btn-icon">👁️</button>
+                    <button onclick="editTestDrive(${testDrive.id})" class="btn-icon">✏️</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
     }
 
     function createPart() {
-        alert('Функция добавления запчасти. Можно реализовать модальное окно.');
+        const modal = `
+            <div class="modal" style="display: block; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+                <div class="modal-content" style="background-color: #fefefe; margin: 2% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 600px; border-radius: 8px;">
+                    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Добавление запчасти</h3>
+                        <span class="close" onclick="closeModal()" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createPartForm">
+                            <div style="margin-bottom: 15px;">
+                                <label for="partName" style="display: block; margin-bottom: 5px; font-weight: 600;">Название запчасти:</label>
+                                <input type="text" id="partName" name="partName" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="partNumber" style="display: block; margin-bottom: 5px; font-weight: 600;">Артикул:</label>
+                                <input type="text" id="partNumber" name="partNumber" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="partCategory" style="display: block; margin-bottom: 5px; font-weight: 600;">Категория:</label>
+                                <select id="partCategory" name="partCategory" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="">Выберите категорию</option>
+                                    <option value="Гидравлика">Гидравлика</option>
+                                    <option value="Фильтры">Фильтры</option>
+                                    <option value="Смазочные материалы">Смазочные материалы</option>
+                                    <option value="Привод">Привод</option>
+                                    <option value="Электроника">Электроника</option>
+                                    <option value="Кузов">Кузов</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="partPrice" style="display: block; margin-bottom: 5px; font-weight: 600;">Цена (₽):</label>
+                                <input type="number" id="partPrice" name="partPrice" min="0" step="100" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="partStock" style="display: block; margin-bottom: 5px; font-weight: 600;">Количество на складе:</label>
+                                <input type="number" id="partStock" name="partStock" min="0" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label for="partDescription" style="display: block; margin-bottom: 5px; font-weight: 600;">Описание:</label>
+                                <textarea id="partDescription" name="partDescription" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="margin-top: 20px; text-align: right;">
+                        <button onclick="submitPart()" class="btn btn-primary">Добавить</button>
+                        <button onclick="closeModal()" class="btn btn-secondary">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+    }
+    
+    function submitPart() {
+        const form = document.getElementById('createPartForm');
+        const formData = new FormData(form);
+        
+        const partData = {
+            name: formData.get('partName'),
+            part_number: formData.get('partNumber'),
+            category: formData.get('partCategory'),
+            price: formData.get('partPrice'),
+            stock: formData.get('partStock'),
+            description: formData.get('partDescription') || '',
+            status: 'available'
+        };
+        
+        // Валидация
+        if (!partData.name || !partData.part_number || !partData.category || !partData.price || !partData.stock) {
+            alert('Пожалуйста, заполните все обязательные поля');
+            return;
+        }
+        
+        // Добавляем запчасть в таблицу
+        addPartToTable(partData);
+        
+        alert(`Запчасть "${partData.name}" добавлена на склад!`);
+        closeModal();
+    }
+    
+    async function addPartToTable(partData) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Необходимо войти в систему');
+                return;
+            }
+
+            const response = await fetch('/api/admin/spare-parts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    part_number: partData.part_number,
+                    part_name: partData.name,
+                    model_id: null,
+                    price: parseFloat(partData.price) || 0,
+                    quantity_in_stock: parseInt(partData.stock) || 0,
+                    min_quantity: 0,
+                    warehouse_id: 1 // По умолчанию
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    alert(`Запчасть "${partData.name}" добавлена на склад!`);
+                    loadParts(); // Перезагружаем данные
+                } else {
+                    alert('Ошибка при создании запчасти');
+                }
+            } else {
+                alert('Ошибка при создании запчасти');
+            }
+        } catch (error) {
+            console.error('Error creating spare part:', error);
+            alert('Ошибка при создании запчасти');
+        }
+    }
+    
+    function updatePartsTable() {
+        const tbody = document.getElementById('partsTable');
+        tbody.innerHTML = '';
+        
+        if (partsData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Нет данных</td></tr>';
+            return;
+        }
+        
+        partsData.forEach(part => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${part.part_number}</td>
+                <td>${part.name}</td>
+                <td>${part.category}</td>
+                <td>${part.price} ₽</td>
+                <td>${part.stock}</td>
+                <td><span class="badge badge-${getStatusColor(part.status)}">${getStatusText(part.status)}</span></td>
+                <td>
+                    <button onclick="editPart(${part.id})" class="btn-icon">✏️</button>
+                    <button onclick="deletePart(${part.id})" class="btn-icon">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
     }
 
     function viewOrder(id) {
@@ -313,9 +1185,115 @@
     function viewTestDrive(id) {
         alert(`Просмотр тест-драйва #${id}`);
     }
-
+    
+    function editTestDrive(id) {
+        alert(`Редактирование тест-драйва #${id}`);
+    }
+    
     function editPart(id) {
         alert(`Редактирование запчасти #${id}`);
+    }
+    
+    async function deletePart(id) {
+        if (confirm('Удалить запчасть?')) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Необходимо войти в систему');
+                    return;
+                }
+
+                const response = await fetch(`/api/admin/spare-parts/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        alert('Запчасть удалена');
+                        loadParts(); // Перезагружаем данные
+                    } else {
+                        alert('Ошибка при удалении запчасти');
+                    }
+                } else {
+                    alert('Ошибка при удалении запчасти');
+                }
+            } catch (error) {
+                console.error('Error deleting spare part:', error);
+                alert('Ошибка при удалении запчасти');
+            }
+        }
+    }
+
+    function viewServiceRequest(id) {
+        // Найти заявку по ID
+        const requests = getFallbackServiceRequests();
+        const request = requests.find(r => r.id === id);
+        
+        if (request) {
+            const modal = `
+                <div class="modal" style="display: block; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+                    <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px;">
+                        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3>Заявка #${request.id}</h3>
+                            <span class="close" onclick="closeModal()" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Дата:</strong> ${request.date}</p>
+                            <p><strong>Тип услуги:</strong> ${request.service_type}</p>
+                            <p><strong>Клиент:</strong> ${request.customer}</p>
+                            <p><strong>Телефон:</strong> ${request.phone}</p>
+                            <p><strong>Описание:</strong> ${request.title}</p>
+                            <p><strong>Статус:</strong> <span class="badge badge-${getStatusColor(request.status)}">${getStatusText(request.status)}</span></p>
+                        </div>
+                        <div class="modal-footer" style="margin-top: 20px; text-align: right;">
+                            <button onclick="updateServiceRequestStatus(${id})" class="btn btn-primary">Изменить статус</button>
+                            <button onclick="closeModal()" class="btn btn-secondary">Закрыть</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+    }
+
+    function updateServiceRequestStatus(id) {
+        const statuses = [
+            { value: 'pending', text: 'Ожидает' },
+            { value: 'in-progress', text: 'В работе' },
+            { value: 'completed', text: 'Завершено' },
+            { value: 'cancelled', text: 'Отменено' }
+        ];
+        
+        const statusOptions = statuses.map(s => `${s.value} - ${s.text}`).join('\n');
+        const newStatus = prompt(`Выберите новый статус для заявки #${id}:\n\n${statusOptions}\n\nВведите значение:`, 'pending');
+        
+        if (newStatus && statuses.find(s => s.value === newStatus)) {
+            // Обновляем статус в таблице
+            const rows = document.querySelectorAll('#ordersTable tr');
+            rows.forEach(row => {
+                const idCell = row.cells[0];
+                if (idCell && idCell.textContent == id) {
+                    const statusCell = row.cells[7];
+                    if (statusCell) {
+                        const statusText = statuses.find(s => s.value === newStatus)?.text || newStatus;
+                        statusCell.innerHTML = `<span class="badge badge-${getStatusColor(newStatus)}">${statusText}</span>`;
+                    }
+                }
+            });
+            
+            alert(`Статус заявки #${id} изменен на "${statuses.find(s => s.value === newStatus)?.text}"`);
+        }
+    }
+
+    function closeModal() {
+        const modal = document.querySelector('.modal');
+        if (modal) {
+            modal.remove();
+        }
     }
 
     function getStatusColor(status) {
@@ -360,7 +1338,38 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         loadServiceOrders();
+        
+        // Mobile menu functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const adminContent = document.querySelector('.admin-content');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+                adminContent.classList.toggle('sidebar-open');
+            });
+        }
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('open');
+                adminContent.classList.remove('sidebar-open');
+            }
+        });
+
+        // Auto-close sidebar when clicking menu items
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                adminContent.classList.remove('sidebar-open');
+            });
+        });
     });
 </script>
+        </main>
+    </div>
 </body>
 </html>

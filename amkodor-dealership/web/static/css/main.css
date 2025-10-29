@@ -6,6 +6,34 @@
     --warning-color: #f59e0b;
 }
 
+/* Единый стиль для кнопки "Выйти" */
+.btn-logout {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-logout:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.btn-logout:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -63,16 +91,26 @@ body {
 
 /* Buttons */
 .btn-icon {
-    background: none;
-    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
     font-size: 1.25rem;
     cursor: pointer;
-    padding: 0.25rem;
-    transition: transform 0.2s;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+    color: #374151;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
 }
 
 .btn-icon:hover {
-    transform: scale(1.2);
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Pagination */

@@ -275,10 +275,15 @@
             </button>
         </form>
 
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <p style="color: #6b7280;">Нет аккаунта? <a href="/register" style="color: #2563eb; text-decoration: none; font-weight: 600;">Зарегистрироваться</a></p>
+        </div>
+
         <div class="demo-credentials">
             <h4>Тестовые учетные данные</h4>
-            <p><strong>Email:</strong> admin@amkodor.by</p>
-            <p><strong>Пароль:</strong> password123</p>
+            <p><strong>Админ:</strong> admin@amkodor.by / password123</p>
+            <p><strong>Пользователь:</strong> user@example.com / password123</p>
+            <p><strong>Тест:</strong> test@test.com / test123</p>
         </div>
     </div>
 </div>
@@ -311,15 +316,21 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
-                // Сохраняем токен
+                // Сохраняем токен и информацию о пользователе
                 localStorage.setItem('token', data.data.token);
+                localStorage.setItem('userRole', data.data.role || 'user');
+                localStorage.setItem('userName', data.data.name || 'Пользователь');
 
                 // Показываем успех
                 showAlert('Вход выполнен успешно! Перенаправление...', 'success');
 
-                // Перенаправляем на dashboard
+                // Перенаправляем в зависимости от роли
                 setTimeout(() => {
-                    window.location.href = '/admin/dashboard';
+                    if (data.data.role === 'admin') {
+                        window.location.href = '/admin/dashboard';
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
                 }, 1000);
             } else {
                 showAlert(data.error || 'Неверный email или пароль', 'error');

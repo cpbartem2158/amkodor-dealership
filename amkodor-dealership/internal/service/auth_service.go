@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"amkodor-dealership/internal/models"
 	"amkodor-dealership/internal/repository"
 	"amkodor-dealership/internal/utils"
@@ -8,39 +9,34 @@ import (
 )
 
 type AuthService struct {
-	employeeRepo *repository.EmployeeRepository
-	jwtSecret    string
+	userRepo  *repository.UserRepository
+	jwtSecret string
 }
 
-func NewAuthService(employeeRepo *repository.EmployeeRepository, jwtSecret string) *AuthService {
+func NewAuthService(userRepo *repository.UserRepository, jwtSecret string) *AuthService {
 	return &AuthService{
-		employeeRepo: employeeRepo,
-		jwtSecret:    jwtSecret,
+		userRepo:  userRepo,
+		jwtSecret: jwtSecret,
 	}
 }
 
-func (s *AuthService) Login(email, password string) (string, *models.Employee, error) {
-	// Получение сотрудника по email
-	employee, err := s.employeeRepo.GetByEmail(email)
+func (s *AuthService) Login(email, password string) (*models.User, string, error) {
+	// Получение пользователя по email
+	user, err := s.userRepo.GetByEmail(context.Background(), email)
 	if err != nil {
-		return "", nil, fmt.Errorf("invalid credentials")
-	}
-
-	// Проверка активности
-	if !employee.IsActive {
-		return "", nil, fmt.Errorf("account is inactive")
+		return nil, "", fmt.Errorf("invalid credentials")
 	}
 
 	// Проверка пароля
-	if !utils.CheckPasswordHash(password, employee.PasswordHash) {
-		return "", nil, fmt.Errorf("invalid credentials")
+	if !utils.CheckPasswordHash(password, user.PasswordHash) {
+		return nil, "", fmt.Errorf("invalid credentials")
 	}
 
 	// Генерация JWT токена
-	token, err := utils.GenerateJWT(employee.EmployeeID, email, s.jwtSecret, 24)
+	token, err := utils.GenerateJWT(user.UserID, email, s.jwtSecret, 24)
 	if err != nil {
-		return "", nil, fmt.Errorf("error generating token: %w", err)
+		return nil, "", fmt.Errorf("error generating token: %w", err)
 	}
 
-	return token, employee, nil
+	return user, token, nil
 }

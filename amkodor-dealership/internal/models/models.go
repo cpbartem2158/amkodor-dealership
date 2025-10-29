@@ -33,6 +33,19 @@ type Vehicle struct {
 	Specifications   json.RawMessage `json:"specifications,omitempty"`
 }
 
+// CreateVehicleRequest представляет запрос на создание техники
+type CreateVehicleRequest struct {
+	Name     string  `json:"name" validate:"required"`
+	Category string  `json:"category" validate:"required"`
+	Price    float64 `json:"price" validate:"required,min=0"`
+	Status   string  `json:"status" validate:"required"`
+	Year     int     `json:"year" validate:"required,min=2000,max=2030"`
+	Engine   string  `json:"engine" validate:"required"`
+	Power    string  `json:"power" validate:"required"`
+	Weight   string  `json:"weight" validate:"required"`
+	Image    string  `json:"image"`
+}
+
 // VehicleModel представляет модель техники
 type VehicleModel struct {
 	ModelID        int             `json:"model_id"`
@@ -108,6 +121,7 @@ type Sale struct {
 	VIN           string `json:"vin,omitempty"`
 	ModelName     string `json:"model_name,omitempty"`
 	TypeName      string `json:"type_name,omitempty"`
+	CategoryName  string `json:"category_name,omitempty"`
 	ClientName    string `json:"client_name,omitempty"`
 	ClientPhone   string `json:"client_phone,omitempty"`
 	ClientType    string `json:"client_type,omitempty"`
@@ -276,4 +290,207 @@ type APIResponse struct {
 	Data    interface{} `json:"data,omitempty"`
 	Error   string      `json:"error,omitempty"`
 	Message string      `json:"message,omitempty"`
+}
+
+// Дополнительные структуры для фильтров и отчетов
+type VehicleFilters struct {
+	Model     string   `json:"model"`
+	YearFrom  *int     `json:"year_from"`
+	YearTo    *int     `json:"year_to"`
+	PriceFrom *float64 `json:"price_from"`
+	PriceTo   *float64 `json:"price_to"`
+	Status    string   `json:"status"`
+	Color     string   `json:"color"`
+}
+
+type CustomerFilters struct {
+	SearchTerm  string  `json:"search_term"`
+	Phone       string  `json:"phone"`
+	Email       string  `json:"email"`
+	MinDiscount float64 `json:"min_discount"`
+}
+
+type Category struct {
+	CategoryID   int    `json:"category_id"`
+	CategoryName string `json:"category_name"`
+	Description  string `json:"description"`
+}
+
+type EmployeeStats struct {
+	EmployeeID   int     `json:"employee_id"`
+	EmployeeName string  `json:"employee_name"`
+	TotalSales   int     `json:"total_sales"`
+	TotalRevenue float64 `json:"total_revenue"`
+	AvgSalePrice float64 `json:"avg_sale_price"`
+}
+
+type Service struct {
+	ServiceID   int     `json:"service_id"`
+	ServiceName string  `json:"service_name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+	Duration    int     `json:"duration"`
+	IsActive    bool    `json:"is_active"`
+}
+
+type DashboardStats struct {
+	TotalVehicles     int     `json:"total_vehicles"`
+	AvailableVehicles int     `json:"available_vehicles"`
+	TotalSales        int     `json:"total_sales"`
+	TotalRevenue      float64 `json:"total_revenue"`
+	TotalCustomers    int     `json:"total_customers"`
+	ActiveEmployees   int     `json:"active_employees"`
+}
+
+type ChartData struct {
+	Label string  `json:"label"`
+	Value float64 `json:"value"`
+	Date  string  `json:"date"`
+}
+
+type TopEmployee struct {
+	EmployeeID   int     `json:"employee_id"`
+	EmployeeName string  `json:"employee_name"`
+	SalesCount   int     `json:"sales_count"`
+	Revenue      float64 `json:"revenue"`
+}
+
+type ReportFilters struct {
+	StartDate  time.Time `json:"start_date"`
+	EndDate    time.Time `json:"end_date"`
+	EmployeeID int       `json:"employee_id"`
+}
+
+type SalesReport struct {
+	TotalSales   int     `json:"total_sales"`
+	TotalRevenue float64 `json:"total_revenue"`
+	AvgSalePrice float64 `json:"avg_sale_price"`
+	Sales        []Sale  `json:"sales"`
+}
+
+type EmployeesReport struct {
+	TotalEmployees  int             `json:"total_employees"`
+	ActiveEmployees int             `json:"active_employees"`
+	TopPerformers   []TopEmployee   `json:"top_performers"`
+	EmployeeStats   []EmployeeStats `json:"employee_stats"`
+}
+
+type VehiclesReport struct {
+	TotalVehicles     int       `json:"total_vehicles"`
+	AvailableVehicles int       `json:"available_vehicles"`
+	SoldVehicles      int       `json:"sold_vehicles"`
+	Vehicles          []Vehicle `json:"vehicles"`
+}
+
+type SalesReportRow struct {
+	SaleID       int     `json:"sale_id"`
+	SaleDate     string  `json:"sale_date"`
+	ClientName   string  `json:"client_name"`
+	ModelName    string  `json:"model_name"`
+	FinalPrice   float64 `json:"final_price"`
+	EmployeeName string  `json:"employee_name"`
+}
+
+type EmployeeReportRow struct {
+	EmployeeID   int     `json:"employee_id"`
+	EmployeeName string  `json:"employee_name"`
+	SalesCount   int     `json:"sales_count"`
+	TotalRevenue float64 `json:"total_revenue"`
+}
+
+type VehicleReportRow struct {
+	VehicleID     int     `json:"vehicle_id"`
+	ModelName     string  `json:"model_name"`
+	Status        string  `json:"status"`
+	Price         float64 `json:"price"`
+	WarehouseName string  `json:"warehouse_name"`
+}
+
+type ExportRequest struct {
+	ReportType string        `json:"report_type"`
+	Filters    ReportFilters `json:"filters"`
+	Format     string        `json:"format"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type RegisterRequest struct {
+	FirstName  string `json:"first_name"`
+	LastName   string `json:"last_name"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	PositionID int    `json:"position_id"`
+}
+
+type User struct {
+	UserID       int       `json:"user_id" db:"user_id"`
+	Name         string    `json:"name" db:"name"`
+	Email        string    `json:"email" db:"email"`
+	Phone        string    `json:"phone" db:"phone"`
+	PasswordHash string    `json:"-" db:"password_hash"`
+	Role         string    `json:"role" db:"role"`
+	CreatedAt    time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// Favorite представляет избранную технику пользователя
+type Favorite struct {
+	FavoriteID int       `json:"favorite_id" db:"favorite_id"`
+	UserID     int       `json:"user_id" db:"user_id"`
+	VehicleID  int       `json:"vehicle_id" db:"vehicle_id"`
+	CreatedAt  time.Time `json:"created_at" db:"created_at"`
+}
+
+// FavoriteWithVehicle представляет избранную технику с полной информацией о технике
+type FavoriteWithVehicle struct {
+	FavoriteID int       `json:"favorite_id" db:"favorite_id"`
+	UserID     int       `json:"user_id" db:"user_id"`
+	VehicleID  int       `json:"vehicle_id" db:"vehicle_id"`
+	CreatedAt  time.Time `json:"created_at" db:"created_at"`
+	// Информация о технике
+	ModelName    string  `json:"model_name" db:"model_name"`
+	Category     string  `json:"category" db:"category"`
+	Price        float64 `json:"price" db:"price"`
+	Status       string  `json:"status" db:"status"`
+	Year         int     `json:"year" db:"year"`
+	Color        string  `json:"color" db:"color"`
+	SerialNumber string  `json:"serial_number" db:"serial_number"`
+	VIN          string  `json:"vin" db:"vin"`
+}
+
+// CreateServiceOrderRequest запрос на создание сервисного заказа
+type CreateServiceOrderRequest struct {
+	VehicleID         int     `json:"vehicle_id"`
+	CustomerID        *int    `json:"customer_id"`
+	CorporateClientID *int    `json:"corporate_client_id"`
+	EmployeeID        int     `json:"employee_id"`
+	ServiceType       string  `json:"service_type"`
+	Description       string  `json:"description"`
+	Cost              float64 `json:"cost"`
+	Status            string  `json:"status"`
+}
+
+// CreateTestDriveRequest запрос на создание тест-драйва
+type CreateTestDriveRequest struct {
+	VehicleID         int       `json:"vehicle_id"`
+	CustomerID        *int      `json:"customer_id"`
+	CorporateClientID *int      `json:"corporate_client_id"`
+	EmployeeID        int       `json:"employee_id"`
+	ScheduledDate     time.Time `json:"scheduled_date"`
+	Duration          int       `json:"duration"`
+	Status            string    `json:"status"`
+}
+
+// CreateSparePartRequest запрос на создание запчасти
+type CreateSparePartRequest struct {
+	PartNumber      string  `json:"part_number"`
+	PartName        string  `json:"part_name"`
+	ModelID         *int    `json:"model_id"`
+	Price           float64 `json:"price"`
+	QuantityInStock int     `json:"quantity_in_stock"`
+	MinQuantity     int     `json:"min_quantity"`
+	WarehouseID     int     `json:"warehouse_id"`
 }

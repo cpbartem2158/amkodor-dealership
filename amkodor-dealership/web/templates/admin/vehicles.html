@@ -3,331 +3,1323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Техника - Амкодор</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="/static/css/admin.css">
+    <title>Управление техникой - Амкодор</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Стиль для кнопки "Выйти" */
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .page-title-section {
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .add-vehicle-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 0.4rem 0.6rem !important;
+            font-size: 0.8rem !important;
+            font-weight: 700;
+            border-radius: 0.4rem;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            max-width: 200px;
+        }
+
+        .add-vehicle-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+        }
+
+        .vehicles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 1rem 0;
+        }
+
+        .vehicle-card {
+            background: white;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #f1f5f9;
+            position: relative;
+        }
+
+        .vehicle-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            border-color: #3b82f6;
+        }
+
+        .vehicle-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .vehicle-card:hover::before {
+            opacity: 1;
+        }
+
+        .vehicle-image {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vehicle-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 0.75rem 0.75rem 0 0;
+            transition: transform 0.3s ease;
+            display: block;
+        }
+
+        .vehicle-card:hover .vehicle-image img {
+            transform: scale(1.05);
+        }
+
+        .vehicle-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .vehicle-card:hover .vehicle-image::after {
+            opacity: 1;
+        }
+
+        .vehicle-info {
+            padding: 2rem;
+            position: relative;
+        }
+
+        .vehicle-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            color: #1e293b;
+            line-height: 1.3;
+        }
+
+        .vehicle-category {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .vehicle-price {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #059669;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .vehicle-price::before {
+            content: '💰';
+            font-size: 1.25rem;
+        }
+
+        .vehicle-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding: 1.5rem 0 0;
+            border-top: 2px solid #f1f5f9;
+        }
+
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-height: 48px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Admin Layout Styles */
+        .admin-layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .admin-navbar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .admin-logo {
+            color: white;
+            text-decoration: none;
+        }
+
+        .admin-logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar {
+            background: #1f2937;
+            color: white;
+            width: 250px;
+            min-height: calc(100vh - 80px);
+            position: fixed;
+            left: -250px;
+            top: 80px;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: #d1d5db;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #374151;
+            color: white;
+        }
+
+        .menu-item.active {
+            background: #1d4ed8;
+            color: white;
+            border-left-color: #60a5fa;
+        }
+
+        .menu-icon {
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .admin-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+            
+            .admin-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .add-vehicle-btn {
+                padding: 0.4rem 0.5rem !important;
+                font-size: 0.75rem !important;
+                max-width: 180px !important;
+            }
+            
+            .vehicles-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0.5rem 0;
+            }
+            
+            .vehicle-actions {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .btn {
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+                font-weight: 700;
+                min-height: 56px;
+                flex: 1;
+            }
+            
+            .vehicle-card {
+                border-radius: 1rem;
+            }
+            
+            .vehicle-info {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .vehicles-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .vehicle-image {
+                height: 180px;
+                font-size: 3rem;
+            }
+            
+            .vehicle-image img {
+                border-radius: 0.5rem 0.5rem 0 0;
+            }
+            
+            .vehicle-title {
+                font-size: 1.25rem;
+            }
+            
+            .vehicle-price {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="admin-container">
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2>АМКОДОР</h2>
-            <p>Автосалон</p>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="/admin/dashboard" class="nav-item">
-                <span class="icon">📊</span>
-                Дашборд
-            </a>
-            <a href="/admin/vehicles" class="nav-item active">
-                <span class="icon">🚜</span>
-                Техника
-            </a>
-            <a href="/admin/sales" class="nav-item">
-                <span class="icon">💰</span>
-                Продажи
-            </a>
-            <a href="/admin/customers" class="nav-item">
-                <span class="icon">👥</span>
-                Клиенты
-            </a>
-            <a href="/admin/employees" class="nav-item">
-                <span class="icon">👔</span>
-                Сотрудники
-            </a>
-            <a href="/admin/service" class="nav-item">
-                <span class="icon">🔧</span>
-                Сервис
-            </a>
-            <a href="/admin/reports" class="nav-item">
-                <span class="icon">📈</span>
-                Отчеты
-            </a>
+    <div class="admin-layout">
+        <!-- Navigation -->
+        <nav class="admin-navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <a href="/admin/dashboard" class="admin-logo">
+                    <h1>АМКОДОР</h1>
+                </a>
+            </div>
+
+            <div class="navbar-right">
+                <div class="user-info">
+                    <span>Администратор</span>
+                    <button class="btn-logout" onclick="logout()">Выйти</button>
+                </div>
+            </div>
         </nav>
-        <div class="sidebar-footer">
-            <button onclick="logout()" class="btn-logout">Выход</button>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-menu">
+                <a href="/admin/dashboard" class="menu-item">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Главная</span>
+                </a>
+                <a href="/admin/vehicles" class="menu-item active">
+                    <span class="menu-icon">🚜</span>
+                    <span class="menu-text">Техника</span>
+                </a>
+                <a href="/admin/sales" class="menu-item">
+                    <span class="menu-icon">💰</span>
+                    <span class="menu-text">Продажи</span>
+                </a>
+                <a href="/admin/customers" class="menu-item">
+                    <span class="menu-icon">👥</span>
+                    <span class="menu-text">Клиенты</span>
+                </a>
+                <a href="/admin/employees" class="menu-item">
+                    <span class="menu-icon">👔</span>
+                    <span class="menu-text">Сотрудники</span>
+                </a>
+                <a href="/admin/warehouses" class="menu-item">
+                    <span class="menu-icon">🏢</span>
+                    <span class="menu-text">Склады</span>
+                </a>
+                <a href="/admin/service" class="menu-item">
+                    <span class="menu-icon">🔧</span>
+                    <span class="menu-text">Сервис</span>
+                </a>
+                <a href="/admin/reports" class="menu-item">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Отчёты</span>
+                </a>
+                <a href="/admin/settings" class="menu-item">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Настройки</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+        <div class="page-header">
+            <div class="page-title-section">
+                <h1 class="page-title">🚜 Управление техникой</h1>
+                <p class="page-subtitle">Просмотр, редактирование и управление техникой</p>
+            </div>
+            <button class="btn btn-primary add-vehicle-btn" onclick="showAddVehicleForm()">
+                ➕ Добавить технику
+            </button>
         </div>
-    </aside>
-
-    <main class="main-content">
-        <header class="main-header">
-            <h1>Управление техникой</h1>
-            <button onclick="openCreateModal()" class="btn btn-primary">+ Добавить технику</button>
-        </header>
-
+        
+        <!-- Форма добавления техники -->
+        <div id="add-vehicle-form" style="display: none; background: white; border-radius: 1rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 1.5rem; color: #1f2937;">Добавить новую технику</h2>
+            <form id="vehicle-form">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Название техники</label>
+                        <input type="text" id="vehicle-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Категория</label>
+                        <select id="vehicle-category" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                            <option value="">Выберите категорию</option>
+                            <option value="Экскаваторы">Экскаваторы</option>
+                            <option value="Бульдозеры">Бульдозеры</option>
+                            <option value="Погрузчики">Погрузчики</option>
+                            <option value="Тракторы">Тракторы</option>
+                            <option value="Коммунальная техника">Коммунальная техника</option>
+                            <option value="Лесная техника">Лесная техника</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Цена (BYN)</label>
+                        <input type="number" id="vehicle-price" required min="0" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Статус</label>
+                        <select id="vehicle-status" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                            <option value="В наличии">В наличии</option>
+                            <option value="Зарезервировано">Зарезервировано</option>
+                            <option value="Продан">Продан</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Год выпуска</label>
+                        <input type="number" id="vehicle-year" required min="2000" max="2025" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Двигатель</label>
+                        <input type="text" id="vehicle-engine" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Мощность (л.с.)</label>
+                        <input type="number" id="vehicle-power" required min="0" placeholder="180" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Вес (т)</label>
+                        <input type="number" id="vehicle-weight" required min="0" step="0.1" placeholder="14.5" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Фотография техники</label>
+                        <input type="file" id="vehicle-image" accept="image/*" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                        <div id="image-preview" style="margin-top: 0.5rem; text-align: center;"></div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" onclick="hideAddVehicleForm()" style="padding: 0.75rem 1.5rem; border: 1px solid #d1d5db; background: white; border-radius: 0.5rem; cursor: pointer;">Отмена</button>
+                    <button type="submit" style="padding: 0.75rem 1.5rem; background: #059669; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600;">Добавить технику</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Форма редактирования техники -->
+        <div id="edit-vehicle-form" style="display: none; background: white; border-radius: 1rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 1.5rem; color: #1f2937;">Редактировать технику</h2>
+            <form id="edit-vehicle-form-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Название техники</label>
+                        <input type="text" id="edit-vehicle-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Категория</label>
+                        <select id="edit-vehicle-category" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                            <option value="">Выберите категорию</option>
+                            <option value="Экскаваторы">Экскаваторы</option>
+                            <option value="Бульдозеры">Бульдозеры</option>
+                            <option value="Погрузчики">Погрузчики</option>
+                            <option value="Тракторы">Тракторы</option>
+                            <option value="Коммунальная техника">Коммунальная техника</option>
+                            <option value="Лесная техника">Лесная техника</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Цена (BYN)</label>
+                        <input type="number" id="edit-vehicle-price" required min="0" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Статус</label>
+                        <select id="edit-vehicle-status" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                            <option value="В наличии">В наличии</option>
+                            <option value="Зарезервировано">Зарезервировано</option>
+                            <option value="Продан">Продан</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Год выпуска</label>
+                        <input type="number" id="edit-vehicle-year" required min="2000" max="2025" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Двигатель</label>
+                        <input type="text" id="edit-vehicle-engine" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Мощность (л.с.)</label>
+                        <input type="number" id="edit-vehicle-power" required min="0" placeholder="180" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Вес (т)</label>
+                        <input type="number" id="edit-vehicle-weight" required min="0" step="0.1" placeholder="14.5" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Фотография техники</label>
+                        <input type="file" id="edit-vehicle-image" accept="image/*" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                        <div id="edit-image-preview" style="margin-top: 0.5rem; text-align: center;"></div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" onclick="hideEditVehicleForm()" style="padding: 0.75rem 1.5rem; border: 1px solid #d1d5db; background: white; border-radius: 0.5rem; cursor: pointer;">Отмена</button>
+                    <button type="submit" style="padding: 0.75rem 1.5rem; background: #2563eb; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600;">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+        
         <!-- Фильтры -->
-        <section class="filters-section">
-            <div class="filters">
-                <input type="text" id="searchModel" placeholder="Модель" class="form-control">
-                <input type="text" id="searchCategory" placeholder="Категория" class="form-control">
-                <select id="filterStatus" class="form-control">
-                    <option value="">Все статусы</option>
-                    <option value="В наличии">В наличии</option>
-                    <option value="Продано">Продано</option>
-                    <option value="Зарезервировано">Зарезервировано</option>
-                </select>
-                <button onclick="searchVehicles()" class="btn btn-secondary">Поиск</button>
-                <button onclick="resetFilters()" class="btn">Сбросить</button>
+        <div style="background: white; border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3 style="margin-bottom: 1rem; color: #1f2937;">Фильтры</h3>
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Статус:</label>
+                    <select id="status-filter" onchange="filterVehicles()" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.5rem;">
+                        <option value="">Все</option>
+                        <option value="В наличии">В наличии</option>
+                        <option value="Зарезервировано">Зарезервировано</option>
+                        <option value="Продан">Продан</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Категория:</label>
+                    <select id="category-filter" onchange="filterVehicles()" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.5rem;">
+                        <option value="">Все категории</option>
+                        <option value="Экскаваторы">Экскаваторы</option>
+                        <option value="Бульдозеры">Бульдозеры</option>
+                        <option value="Погрузчики">Погрузчики</option>
+                        <option value="Тракторы">Тракторы</option>
+                        <option value="Коммунальная техника">Коммунальная техника</option>
+                        <option value="Лесная техника">Лесная техника</option>
+                    </select>
+                </div>
+                <div>
+                    <button onclick="clearFilters()" style="padding: 0.5rem 1rem; background: #6b7280; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Очистить фильтры</button>
+                </div>
             </div>
-        </section>
-
-        <!-- Таблица -->
-        <section class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Модель</th>
-                    <th>Категория</th>
-                    <th>Год</th>
-                    <th>Цена</th>
-                    <th>Скидка</th>
-                    <th>Статус</th>
-                    <th>Склад</th>
-                    <th>Действия</th>
-                </tr>
-                </thead>
-                <tbody id="vehiclesTable">
-                <tr>
-                    <td colspan="9" style="text-align: center;">Загрузка...</td>
-                </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Пагинация -->
-        <div class="pagination" id="pagination"></div>
-    </main>
-</div>
-
-<!-- Модальное окно создания/редактирования -->
-<div id="vehicleModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="modalTitle">Добавить технику</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
-        <form id="vehicleForm" onsubmit="saveVehicle(event)">
-            <div class="form-group">
-                <label class="form-label">Модель</label>
-                <input type="number" id="modelId" class="form-control" required>
+        
+        <!-- Модальное окно для просмотра информации о технике -->
+        <div id="vehicle-view-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+            <div style="background: white; border-radius: 1rem; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="color: #1f2937; margin: 0;">Информация о технике</h2>
+                    <button onclick="closeVehicleViewModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280;">&times;</button>
+                </div>
+                
+                <div id="vehicle-view-content">
+                    <!-- Содержимое будет заполнено JavaScript -->
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button onclick="closeVehicleViewModal()" style="padding: 0.75rem 1.5rem; border: 1px solid #d1d5db; background: white; border-radius: 0.5rem; cursor: pointer;">Закрыть</button>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Склад</label>
-                <input type="number" id="warehouseId" class="form-control" required>
+        </div>
+        
+            <div class="vehicles-grid" id="vehicles-grid">
+                <!-- Техника будет загружена здесь -->
             </div>
-            <div class="form-group">
-                <label class="form-label">VIN</label>
-                <input type="text" id="vin" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Серийный номер</label>
-                <input type="text" id="serialNumber" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Год выпуска</label>
-                <input type="number" id="manufactureYear" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Цвет</label>
-                <input type="text" id="color" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Цена</label>
-                <input type="number" step="0.01" id="price" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Скидка (%)</label>
-                <input type="number" step="0.01" id="discount" class="form-control" value="0">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Статус</label>
-                <select id="status" class="form-control">
-                    <option value="В наличии">В наличии</option>
-                    <option value="Зарезервировано">Зарезервировано</option>
-                    <option value="Продано">Продано</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-        </form>
+        </main>
     </div>
-</div>
 
-<script src="/static/js/api.js"></script>
-<script>
-    let currentVehicleId = null;
-    let currentPage = 0;
-    const perPage = 20;
+    <script>
+        // Глобальная переменная для хранения техники
+        let vehicles = [];
 
-    async function loadVehicles() {
-        try {
-            const vehicles = await API.vehicles.getAll({ limit: perPage, offset: currentPage * perPage });
-            displayVehicles(vehicles);
-        } catch (error) {
-            console.error('Error loading vehicles:', error);
-            alert('Ошибка загрузки данных');
-        }
-    }
-
-    function displayVehicles(vehicles) {
-        const tbody = document.getElementById('vehiclesTable');
-
-        if (!vehicles || vehicles.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Нет данных</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = vehicles.map(v => `
-                <tr>
-                    <td>${v.vehicle_id}</td>
-                    <td>${v.model_name || '-'}</td>
-                    <td>${v.category_name || '-'}</td>
-                    <td>${v.manufacture_year}</td>
-                    <td>${formatCurrency(v.price)}</td>
-                    <td>${v.discount}%</td>
-                    <td><span class="badge badge-${getStatusColor(v.status)}">${v.status}</span></td>
-                    <td>${v.warehouse_city || '-'}</td>
-                    <td>
-                        <button onclick="editVehicle(${v.vehicle_id})" class="btn-icon">✏️</button>
-                        <button onclick="viewHistory(${v.vehicle_id})" class="btn-icon">📜</button>
-                        <button onclick="deleteVehicle(${v.vehicle_id})" class="btn-icon">🗑️</button>
-                    </td>
-                </tr>
-            `).join('');
-    }
-
-    async function searchVehicles() {
-        const params = {
-            model_name: document.getElementById('searchModel').value,
-            category_name: document.getElementById('searchCategory').value,
-            status: document.getElementById('filterStatus').value,
-        };
-
-        try {
-            const vehicles = await API.vehicles.search(params);
-            displayVehicles(vehicles);
-        } catch (error) {
-            console.error('Error searching vehicles:', error);
-        }
-    }
-
-    function resetFilters() {
-        document.getElementById('searchModel').value = '';
-        document.getElementById('searchCategory').value = '';
-        document.getElementById('filterStatus').value = '';
-        loadVehicles();
-    }
-
-    function openCreateModal() {
-        currentVehicleId = null;
-        document.getElementById('modalTitle').textContent = 'Добавить технику';
-        document.getElementById('vehicleForm').reset();
-        document.getElementById('vehicleModal').classList.add('active');
-    }
-
-    async function editVehicle(id) {
-        try {
-            const vehicle = await API.vehicles.getById(id);
-            currentVehicleId = id;
-
-            document.getElementById('modalTitle').textContent = 'Редактировать технику';
-            document.getElementById('modelId').value = vehicle.model_id;
-            document.getElementById('warehouseId').value = vehicle.warehouse_id;
-            document.getElementById('vin').value = vehicle.vin || '';
-            document.getElementById('serialNumber').value = vehicle.serial_number;
-            document.getElementById('manufactureYear').value = vehicle.manufacture_year;
-            document.getElementById('color').value = vehicle.color || '';
-            document.getElementById('price').value = vehicle.price;
-            document.getElementById('discount').value = vehicle.discount;
-            document.getElementById('status').value = vehicle.status;
-
-            document.getElementById('vehicleModal').classList.add('active');
-        } catch (error) {
-            console.error('Error loading vehicle:', error);
-            alert('Ошибка загрузки данных');
-        }
-    }
-
-    async function saveVehicle(event) {
-        event.preventDefault();
-
-        const data = {
-            model_id: parseInt(document.getElementById('modelId').value),
-            warehouse_id: parseInt(document.getElementById('warehouseId').value),
-            vin: document.getElementById('vin').value,
-            serial_number: document.getElementById('serialNumber').value,
-            manufacture_year: parseInt(document.getElementById('manufactureYear').value),
-            color: document.getElementById('color').value,
-            price: parseFloat(document.getElementById('price').value),
-            discount: parseFloat(document.getElementById('discount').value),
-            status: document.getElementById('status').value,
-        };
-
-        try {
-            if (currentVehicleId) {
-                await API.vehicles.update(currentVehicleId, data);
-            } else {
-                await API.vehicles.create(data);
+        // Проверка авторизации
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
             }
 
-            closeModal();
+            // Инициализация мобильного меню
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const adminContent = document.querySelector('.admin-content');
+
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+                adminContent.classList.toggle('sidebar-open');
+            });
+
+            // Закрытие меню при клике вне его
+            document.addEventListener('click', function(e) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                    adminContent.classList.remove('sidebar-open');
+                }
+            });
+
             loadVehicles();
-            alert('Сохранено успешно');
-        } catch (error) {
-            console.error('Error saving vehicle:', error);
-            alert('Ошибка сохранения');
+            
+            // Обработчик формы добавления техники
+            document.getElementById('vehicle-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addVehicle();
+            });
+            
+            // Обработчик формы редактирования техники
+            document.getElementById('edit-vehicle-form-content').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveVehicleChanges();
+            });
+
+            // Обработчик загрузки изображения для добавления
+            document.getElementById('vehicle-image').addEventListener('change', function(e) {
+                handleImagePreview(e, 'image-preview');
+            });
+
+            // Обработчик загрузки изображения для редактирования
+            document.getElementById('edit-vehicle-image').addEventListener('change', function(e) {
+                handleImagePreview(e, 'edit-image-preview');
+            });
+        });
+
+        // Обработка предварительного просмотра изображения
+        function handleImagePreview(event, previewId) {
+            const file = event.target.files[0];
+            const preview = document.getElementById(previewId);
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `
+                        <div style="width: 200px; height: 150px; border-radius: 0.75rem; overflow: hidden; border: 2px solid #e5e7eb; background: #f8fafc; display: flex; align-items: center; justify-content: center;">
+                            <img src="${e.target.result}" alt="Предварительный просмотр" 
+                                 style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '';
+            }
         }
-    }
 
-    async function deleteVehicle(id) {
-        if (!confirm('Вы уверены, что хотите удалить эту технику?')) return;
-
-        try {
-            await API.vehicles.delete(id);
-            loadVehicles();
-            alert('Удалено успешно');
-        } catch (error) {
-            console.error('Error deleting vehicle:', error);
-            alert('Ошибка удаления');
+        // Загрузка изображения на сервер
+        async function uploadImageToServer(file) {
+            console.log('Загрузка изображения:', file.name, file.size, file.type);
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch('/api/vehicles/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Ответ сервера:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Ошибка сервера:', errorText);
+                    throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Результат загрузки:', result);
+                
+                if (result.success) {
+                    return result.data.url;
+                } else {
+                    throw new Error(result.message || 'Ошибка загрузки изображения');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки изображения:', error);
+                throw error;
+            }
         }
-    }
 
-    async function viewHistory(id) {
-        try {
-            const history = await API.vehicles.getHistory(id);
-            console.log('History:', history);
-            alert(`История изменений для техники #${id}\n\nСм. консоль для деталей`);
-        } catch (error) {
-            console.error('Error loading history:', error);
+        // Загрузка техники
+        async function loadVehicles() {
+            try {
+                console.log('Загружаем технику с сервера...');
+                const response = await fetch('/api/vehicles');
+                const data = await response.json();
+                
+                console.log('Ответ сервера:', data);
+                
+                if (data.success && data.data) {
+                    // Преобразуем данные в нужный формат
+                    vehicles = data.data.map((vehicle, index) => ({
+                        id: index + 1,
+                        name: vehicle.name,
+                        category: vehicle.category,
+                        price: vehicle.price,
+                        status: vehicle.status,
+                        year: vehicle.year,
+                        engine: vehicle.engine,
+                        power: vehicle.power,
+                        weight: vehicle.weight,
+                        image: vehicle.image
+                    }));
+                    console.log('Загружено техники:', vehicles.length);
+                    displayVehicles(vehicles);
+                } else {
+                    vehicles = [];
+                    displayVehicles([]);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки техники:', error);
+                vehicles = [];
+                displayVehicles([]);
+            }
         }
-    }
 
-    function closeModal() {
-        document.getElementById('vehicleModal').classList.remove('active');
-    }
+        // Отображение техники
+        function displayVehicles(vehiclesToShow) {
+            const grid = document.getElementById('vehicles-grid');
+            
+            if (vehiclesToShow.length === 0) {
+                grid.innerHTML = '<p>Техника не найдена</p>';
+                return;
+            }
+            
+            grid.innerHTML = vehiclesToShow.map(vehicle => `
+                <div class="vehicle-card">
+                    <div class="vehicle-image">
+                        ${vehicle.image && vehicle.image !== '🚜' ? 
+                            `<img src="${vehicle.image}" alt="${vehicle.name}">` : 
+                            '🚜'
+                        }
+                    </div>
+                    <div class="vehicle-info">
+                        <h3 class="vehicle-title">${vehicle.name}</h3>
+                        <p class="vehicle-category">${vehicle.category}</p>
+                        <div class="vehicle-price">${formatPrice(vehicle.price)} BYN</div>
+                        <div style="margin: 0.5rem 0;">
+                            <span style="padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600; ${getStatusStyle(vehicle.status)}">${vehicle.status}</span>
+                        </div>
+                        <div class="vehicle-actions">
+                            <button class="btn btn-success" onclick="viewVehicle(${vehicle.id})">👁️ Просмотр</button>
+                            <button class="btn btn-primary" onclick="editVehicle(${vehicle.id})">✏️ Редактировать</button>
+                            ${vehicle.status !== 'Продан' ? `<button class="btn btn-success" onclick="sellVehicle(${vehicle.id})">💰 Продать</button>` : ''}
+                            <button class="btn btn-danger" onclick="deleteVehicle(${vehicle.id})">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-    function getStatusColor(status) {
-        const colors = {
-            'В наличии': 'success',
-            'Продано': 'danger',
-            'Зарезервировано': 'warning',
-        };
-        return colors[status] || 'secondary';
-    }
+        // Получение стиля для статуса
+        function getStatusStyle(status) {
+            switch(status) {
+                case 'В наличии':
+                    return 'background: #d1fae5; color: #065f46;';
+                case 'Зарезервировано':
+                    return 'background: #fef3c7; color: #92400e;';
+                case 'Продан':
+                    return 'background: #fee2e2; color: #991b1b;';
+                default:
+                    return 'background: #f3f4f6; color: #374151;';
+            }
+        }
 
-    function formatCurrency(value) {
-        return new Intl.NumberFormat('ru-BY', {
-            style: 'decimal',
-            minimumFractionDigits: 2
-        }).format(value);
-    }
+        // Форматирование цены
+        function formatPrice(price) {
+            return new Intl.NumberFormat('ru-RU').format(price);
+        }
 
-    function logout() {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-    }
+        // Редактирование техники
+        function editVehicle(id) {
+            const vehicle = vehicles.find(v => v.id === id);
+            if (!vehicle) {
+                alert('Техника не найдена');
+                return;
+            }
+            
+            // Заполняем форму редактирования данными техники
+            document.getElementById('edit-vehicle-name').value = vehicle.name;
+            document.getElementById('edit-vehicle-category').value = vehicle.category;
+            document.getElementById('edit-vehicle-price').value = vehicle.price;
+            document.getElementById('edit-vehicle-status').value = vehicle.status;
+            document.getElementById('edit-vehicle-year').value = vehicle.year;
+            document.getElementById('edit-vehicle-engine').value = vehicle.engine || '';
+            document.getElementById('edit-vehicle-power').value = vehicle.power ? vehicle.power.replace(' л.с.', '') : '';
+            document.getElementById('edit-vehicle-weight').value = vehicle.weight ? vehicle.weight.replace(' т', '') : '';
+            // Для изображения показываем текущее изображение в превью
+            const imagePreview = document.getElementById('edit-image-preview');
+            if (vehicle.image && vehicle.image !== '🚜') {
+                imagePreview.innerHTML = `
+                    <div style="width: 200px; height: 150px; border-radius: 0.75rem; overflow: hidden; border: 2px solid #e5e7eb; background: #f8fafc; display: flex; align-items: center; justify-content: center;">
+                        <img src="${vehicle.image}" alt="Текущее изображение" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                `;
+            } else {
+                imagePreview.innerHTML = '';
+            }
+            
+            // Сохраняем ID редактируемой техники
+            document.getElementById('edit-vehicle-form').setAttribute('data-vehicle-id', id);
+            
+            // Показываем форму редактирования
+            document.getElementById('edit-vehicle-form').style.display = 'block';
+            
+            // Скрываем форму добавления, если она открыта
+            document.getElementById('add-vehicle-form').style.display = 'none';
+        }
 
-    document.addEventListener('DOMContentLoaded', loadVehicles);
-</script>
+        // Продажа техники
+        function sellVehicle(id) {
+            const vehicle = vehicles.find(v => v.id === id);
+            if (!vehicle) {
+                alert('Техника не найдена');
+                return;
+            }
+            
+            if (confirm(`Продать "${vehicle.name}" за ${formatPrice(vehicle.price)}?`)) {
+                vehicle.status = 'Продан';
+                alert('Техника отмечена как проданная!');
+                displayVehicles(vehicles);
+            }
+        }
+
+        // Удаление техники
+        function deleteVehicle(id) {
+            const vehicle = vehicles.find(v => v.id === id);
+            if (!vehicle) {
+                alert('Техника не найдена');
+                return;
+            }
+            
+            if (confirm(`Удалить "${vehicle.name}"? Это действие нельзя отменить.`)) {
+                vehicles = vehicles.filter(v => v.id !== id);
+                alert('Техника удалена!');
+                displayVehicles(vehicles);
+            }
+        }
+
+        // Показать форму добавления техники
+        function showAddVehicleForm() {
+            document.getElementById('add-vehicle-form').style.display = 'block';
+        }
+
+        // Скрыть форму добавления техники
+        function hideAddVehicleForm() {
+            document.getElementById('add-vehicle-form').style.display = 'none';
+            document.getElementById('vehicle-form').reset();
+        }
+        
+        // Скрыть форму редактирования техники
+        function hideEditVehicleForm() {
+            document.getElementById('edit-vehicle-form').style.display = 'none';
+            document.getElementById('edit-vehicle-form-content').reset();
+        }
+        
+        // Просмотр информации о технике
+        function viewVehicle(id) {
+            const vehicle = vehicles.find(v => v.id === id);
+            if (!vehicle) {
+                alert('Техника не найдена');
+                return;
+            }
+            
+            // Заполняем содержимое модального окна
+            const content = `
+                <div style="display: grid; gap: 1.5rem;">
+                    <!-- Основная информация -->
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                        <div style="font-size: 4rem; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 0.75rem; overflow: hidden; background: #f8fafc;">
+                            ${vehicle.image && vehicle.image !== '🚜' ? 
+                                `<img src="${vehicle.image}" alt="${vehicle.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.75rem;">` : 
+                                '🚜'
+                            }
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; color: #1f2937; font-size: 1.75rem; font-weight: 700;">${vehicle.name}</h3>
+                            <p style="margin: 0.5rem 0 0 0; color: #6b7280; font-size: 1.125rem;">${vehicle.category}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Основные характеристики -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div style="padding: 1.25rem; background: #f8fafc; border-radius: 0.75rem; border-left: 4px solid #059669;">
+                            <h4 style="margin: 0 0 0.75rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Цена</h4>
+                            <p style="margin: 0; color: #059669; font-size: 1.5rem; font-weight: 700;">${formatPrice(vehicle.price)} BYN</p>
+                        </div>
+                        
+                        <div style="padding: 1.25rem; background: #f8fafc; border-radius: 0.75rem; border-left: 4px solid #3b82f6;">
+                            <h4 style="margin: 0 0 0.75rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Статус</h4>
+                            <span style="padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600; ${getStatusStyle(vehicle.status)}">${vehicle.status}</span>
+                        </div>
+                        
+                        <div style="padding: 1.25rem; background: #f8fafc; border-radius: 0.75rem; border-left: 4px solid #8b5cf6;">
+                            <h4 style="margin: 0 0 0.75rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Год выпуска</h4>
+                            <p style="margin: 0; color: #1f2937; font-size: 1.25rem; font-weight: 600;">${vehicle.year}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Технические характеристики -->
+                    <div style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem;">
+                        <h3 style="margin: 0 0 1rem 0; color: #1f2937; font-size: 1.25rem; font-weight: 600;">Технические характеристики</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Двигатель</h4>
+                                <p style="margin: 0; color: #1f2937; font-size: 1rem; font-weight: 500;">${vehicle.engine || 'Не указан'}</p>
+                            </div>
+                            
+                            <div style="padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Мощность</h4>
+                                <p style="margin: 0; color: #1f2937; font-size: 1rem; font-weight: 500;">${vehicle.power || 'Не указана'}</p>
+                            </div>
+                            
+                            <div style="padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Вес</h4>
+                                <p style="margin: 0; color: #1f2937; font-size: 1rem; font-weight: 500;">${vehicle.weight || 'Не указан'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Дополнительная информация -->
+                    <div style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem;">
+                        <h3 style="margin: 0 0 1rem 0; color: #1f2937; font-size: 1.25rem; font-weight: 600;">Дополнительная информация</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Серийный номер</h4>
+                                <p style="margin: 0; color: #1f2937; font-size: 1rem; font-family: monospace; font-weight: 500;">${vehicle.serial_number || 'Не указан'}</p>
+                            </div>
+                            
+                            <div style="padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">VIN</h4>
+                                <p style="margin: 0; color: #1f2937; font-size: 1rem; font-family: monospace; font-weight: 500;">${vehicle.vin || 'Не указан'}</p>
+                            </div>
+                            
+                            <div style="padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Цвет</h4>
+                                <p style="margin: 0; color: #1f2937; font-size: 1rem; font-weight: 500;">${vehicle.color || 'Не указан'}</p>
+                            </div>
+                            
+                            <div style="padding: 1rem; background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Иконка</h4>
+                                <p style="margin: 0; color: #1f2937; font-size: 1.5rem;">${vehicle.image || '🚜'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('vehicle-view-content').innerHTML = content;
+            document.getElementById('vehicle-view-modal').style.display = 'flex';
+        }
+        
+        // Закрыть модальное окно просмотра
+        function closeVehicleViewModal() {
+            document.getElementById('vehicle-view-modal').style.display = 'none';
+        }
+        
+        // Закрытие модального окна по клику на фон
+        document.getElementById('vehicle-view-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVehicleViewModal();
+            }
+        });
+
+        // Добавить новую технику
+        async function addVehicle() {
+            const imageFile = document.getElementById('vehicle-image').files[0];
+            let imageData = '🚜'; // По умолчанию эмодзи
+            
+            // Если выбрано изображение, загружаем его на сервер
+            if (imageFile) {
+                try {
+                    imageData = await uploadImageToServer(imageFile);
+                } catch (error) {
+                    console.error('Ошибка загрузки изображения:', error);
+                    alert('Ошибка при загрузке изображения');
+                    return;
+                }
+            }
+            
+            const newVehicle = {
+                id: Date.now(), // Простой ID на основе времени
+                name: document.getElementById('vehicle-name').value,
+                category: document.getElementById('vehicle-category').value,
+                price: parseInt(document.getElementById('vehicle-price').value),
+                status: document.getElementById('vehicle-status').value,
+                year: parseInt(document.getElementById('vehicle-year').value),
+                engine: document.getElementById('vehicle-engine').value,
+                power: document.getElementById('vehicle-power').value + ' л.с.',
+                weight: document.getElementById('vehicle-weight').value + ' т',
+                image: imageData
+            };
+
+            // Отправляем данные на сервер
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/admin/vehicles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(newVehicle)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Ошибка сервера:', errorText);
+                    alert('Ошибка при сохранении техники: ' + errorText);
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('Техника сохранена:', result);
+                
+                // Добавляем новую технику в массив
+                vehicles.push(newVehicle);
+                
+                // Обновляем отображение
+                displayVehicles(vehicles);
+                
+                // Скрываем форму и очищаем её
+                hideAddVehicleForm();
+                
+                alert('Техника успешно добавлена!');
+            } catch (error) {
+                console.error('Ошибка при сохранении техники:', error);
+                alert('Ошибка при сохранении техники: ' + error.message);
+            }
+        }
+        
+        // Сохранение изменений техники
+        async function saveVehicleChanges() {
+            const vehicleId = document.getElementById('edit-vehicle-form').getAttribute('data-vehicle-id');
+            const vehicle = vehicles.find(v => v.id == vehicleId);
+            
+            if (!vehicle) {
+                alert('Техника не найдена');
+                return;
+            }
+            
+            const imageFile = document.getElementById('edit-vehicle-image').files[0];
+            let imageData = vehicle.image; // Сохраняем текущее изображение
+            
+            // Если выбрано новое изображение, загружаем его на сервер
+            if (imageFile) {
+                try {
+                    imageData = await uploadImageToServer(imageFile);
+                } catch (error) {
+                    console.error('Ошибка загрузки изображения:', error);
+                    alert('Ошибка при загрузке изображения');
+                    return;
+                }
+            }
+            
+            // Обновляем данные техники
+            vehicle.name = document.getElementById('edit-vehicle-name').value;
+            vehicle.category = document.getElementById('edit-vehicle-category').value;
+            vehicle.price = parseInt(document.getElementById('edit-vehicle-price').value);
+            vehicle.status = document.getElementById('edit-vehicle-status').value;
+            vehicle.year = parseInt(document.getElementById('edit-vehicle-year').value);
+            vehicle.engine = document.getElementById('edit-vehicle-engine').value;
+            vehicle.power = document.getElementById('edit-vehicle-power').value + ' л.с.';
+            vehicle.weight = document.getElementById('edit-vehicle-weight').value + ' т';
+            vehicle.image = imageData;
+            
+            // Обновляем отображение
+            displayVehicles(vehicles);
+            
+            // Скрываем форму редактирования
+            hideEditVehicleForm();
+            
+            alert('Изменения сохранены!');
+        }
+
+        // Фильтрация техники
+        function filterVehicles() {
+            const statusFilter = document.getElementById('status-filter').value;
+            const categoryFilter = document.getElementById('category-filter').value;
+            
+            let filteredVehicles = vehicles;
+            
+            if (statusFilter) {
+                filteredVehicles = filteredVehicles.filter(vehicle => vehicle.status === statusFilter);
+            }
+            
+            if (categoryFilter) {
+                filteredVehicles = filteredVehicles.filter(vehicle => vehicle.category === categoryFilter);
+            }
+            
+            displayVehicles(filteredVehicles);
+        }
+
+        // Очистить фильтры
+        function clearFilters() {
+            document.getElementById('status-filter').value = '';
+            document.getElementById('category-filter').value = '';
+            displayVehicles(vehicles);
+        }
+
+        // Выход из системы
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+    </script>
 </body>
 </html>

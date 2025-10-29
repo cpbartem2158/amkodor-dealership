@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -11,8 +12,8 @@ type VehicleRepository struct {
 	db *sql.DB
 }
 
-func NewVehicleRepository(db *sql.DB) *VehicleRepository {
-	return &VehicleRepository{db: db}
+func NewVehicleRepository(db *sql.DB) VehicleRepository {
+	return VehicleRepository{db: db}
 }
 
 // GetAll возвращает все единицы техники
@@ -49,7 +50,7 @@ func (r *VehicleRepository) GetAll(limit, offset int) ([]models.Vehicle, error) 
 }
 
 // GetByID возвращает технику по ID
-func (r *VehicleRepository) GetByID(id int) (*models.Vehicle, error) {
+func (r *VehicleRepository) GetByID(ctx context.Context, id int) (*models.Vehicle, error) {
 	query := `
 		SELECT * FROM vw_vehicles_full_info
 		WHERE vehicle_id = $1

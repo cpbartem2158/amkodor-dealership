@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"amkodor-dealership/internal/models"
 	"amkodor-dealership/internal/repository"
 )
@@ -19,7 +20,7 @@ func (s *VehicleService) GetAll(limit, offset int) ([]models.Vehicle, error) {
 }
 
 func (s *VehicleService) GetByID(id int) (*models.Vehicle, error) {
-	return s.repo.GetByID(id)
+	return s.repo.GetByID(context.Background(), id)
 }
 
 func (s *VehicleService) Create(v *models.Vehicle) (int, error) {
